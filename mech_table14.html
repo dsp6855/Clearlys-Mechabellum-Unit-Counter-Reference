@@ -40,7 +40,7 @@
 <body class="bg-gray-100 text-gray-800">
 
 <div class="container mx-auto px-4 py-8 relative">
-    <!-- version="Clearly1.30" 
+    <!-- version="Clearly1.41" 
 	Author:  "Clearly Misunderstood"
 	LinkedIn:  "https://www.linkedin.com/in/dpitts"
 	Date:  8/6/2025
@@ -51,7 +51,7 @@
 	-->
     <!-- Version Number Display -->
     <div class="absolute top-4 right-4 text-xs text-gray-500">
-        version: 1.4
+        version: 1.41
     </div>
     <h1 class="text-3xl md:text-4xl font-bold text-center mb-6">Mechabellum Unit Counter Reference</h1>
     <p class="text-center text-lg max-w-2xl mx-auto mb-8">
@@ -1517,54 +1517,39 @@
             quantityDisplaySpan.textContent = currentQuantity;
         }
         updateAllCalculations();
+        // Re-render the sidebars to apply the new sorting
+        renderSelectionSidebars();
     }
 
-    function renderUnits(category) {
-        const unitCardsDisplay = document.getElementById('unit-cards-display');
+    function renderSelectionSidebars() {
         const enemySelectUnitsDiv = document.getElementById('enemy-select-units');
         const deployedSelectUnitsDiv = document.getElementById('deployed-select-units');
 
-        unitCardsDisplay.innerHTML = '';
         enemySelectUnitsDiv.innerHTML = '';
         deployedSelectUnitsDiv.innerHTML = '';
 
-        let filteredUnits = category === 'all' ? unitsData : unitsData.filter(unit => unit.categories.includes(category));
-        filteredUnits.sort((a, b) => a.name.localeCompare(b.name));
+        // Sort units for enemy sidebar
+        const sortedEnemyUnits = [...unitsData].sort((a, b) => {
+            const aSelected = selectedEnemyUnitQuantities.has(a.name);
+            const bSelected = selectedEnemyUnitQuantities.has(b.name);
 
-        filteredUnits.forEach(unit => {
+            if (aSelected && !bSelected) return -1;
+            if (!aSelected && bSelected) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        // Sort units for deployed sidebar
+        const sortedDeployedUnits = [...unitsData].sort((a, b) => {
+            const aSelected = deployedFriendlyUnitQuantities.has(a.name);
+            const bSelected = deployedFriendlyUnitQuantities.has(b.name);
+
+            if (aSelected && !bSelected) return -1;
+            if (!aSelected && bSelected) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        sortedEnemyUnits.forEach(unit => {
             const unitId = unit.name.toLowerCase().replace(/\s/g, '-');
-
-            // Create main unit card
-            const unitCard = document.createElement('div');
-            unitCard.id = `${unitId}-card`;
-            unitCard.className = 'bg-white rounded-lg shadow-lg p-6 cursor-pointer transform transition duration-300 ease-in-out hover:scale-105 unit-card-header';
-            unitCard.innerHTML = `
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">${unit.name}</h3>
-                <p class="text-sm text-gray-500 mb-2 capitalize">
-                    Categories: ${unit.categories.join(', ')}
-                </p>
-                <p class="text-sm text-gray-500 mb-4">
-                    Cost: ${unit.cost} | Tier: ${unit.tier} | Mirror: ${unit.mirrorMatchRating}
-                </p>
-                <div class="counters mt-4 hidden">
-                    <h4 class="text-md font-medium text-gray-800 mb-2">Good Counters:</h4>
-                    <ul class="list-disc list-inside text-gray-700">
-                        ${unit.counters.sort((a, b) => {
-                            // Sort by best overall rating across all quantity bands for display
-                            const bestRatingA = Math.max(...a.matchups.map(m => getRatingValue(m.rating)));
-                            const bestRatingB = Math.max(...b.matchups.map(m => getRatingValue(m.rating)));
-                            return bestRatingB - bestRatingA;
-                        }).map(counter => formatCounterDisplayForCard(counter)).join('')}
-                    </ul>
-                </div>
-            `;
-            unitCard.addEventListener('click', () => {
-                const countersDiv = unitCard.querySelector('.counters');
-                countersDiv.classList.toggle('hidden');
-            });
-            unitCardsDisplay.appendChild(unitCard);
-
-            // Create checkbox and quantity for "Select Enemy Units"
             const enemyCheckboxContainer = document.createElement('div');
             enemyCheckboxContainer.className = 'flex items-center justify-between py-0.5';
             enemyCheckboxContainer.innerHTML = `
@@ -1581,26 +1566,23 @@
             const enemyCheckboxInput = enemyCheckboxContainer.querySelector('input[type="checkbox"]');
             const enemyQuantityDisplay = enemyCheckboxContainer.querySelector('.quantity-display');
 
-            // Set initial state from map
             const initialEnemyQuantity = selectedEnemyUnitQuantities.get(unit.name) || 0;
             enemyQuantityDisplay.textContent = initialEnemyQuantity;
             enemyCheckboxInput.checked = initialEnemyQuantity > 0;
 
             enemyCheckboxInput.addEventListener('change', (event) => {
                 if (event.target.checked) {
-                    if (!selectedEnemyUnitQuantities.has(unit.name)) { // If not already in map, add with default 1
+                    if (!selectedEnemyUnitQuantities.has(unit.name)) {
                         selectedEnemyUnitQuantities.set(unit.name, 1);
-                        enemyQuantityDisplay.textContent = 1;
                     }
                 } else {
                     selectedEnemyUnitQuantities.delete(unit.name);
-                    enemyQuantityDisplay.textContent = 0;
                 }
                 updateAllCalculations();
+                renderSelectionSidebars(); // Re-render to sort
             });
             enemySelectUnitsDiv.appendChild(enemyCheckboxContainer);
 
-            // Add event listeners for quantity buttons
             enemyCheckboxContainer.querySelectorAll('.quantity-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const unitName = event.target.dataset.unit;
@@ -1609,9 +1591,10 @@
                     handleQuantityChange(unitName, action, type);
                 });
             });
+        });
 
-
-            // Create checkbox and quantity for "Select My Deployed Units"
+        sortedDeployedUnits.forEach(unit => {
+            const unitId = unit.name.toLowerCase().replace(/\s/g, '-');
             const deployedCheckboxContainer = document.createElement('div');
             deployedCheckboxContainer.className = 'flex items-center justify-between py-0.5';
             deployedCheckboxContainer.innerHTML = `
@@ -1628,26 +1611,23 @@
             const deployedCheckboxInput = deployedCheckboxContainer.querySelector('input[type="checkbox"]');
             const deployedQuantityDisplay = deployedCheckboxContainer.querySelector('.quantity-display');
 
-            // Set initial state from map
             const initialDeployedQuantity = deployedFriendlyUnitQuantities.get(unit.name) || 0;
             deployedQuantityDisplay.textContent = initialDeployedQuantity;
             deployedCheckboxInput.checked = initialDeployedQuantity > 0;
 
             deployedCheckboxInput.addEventListener('change', (event) => {
                 if (event.target.checked) {
-                    if (!deployedFriendlyUnitQuantities.has(unit.name)) { // If not already in map, add with default 1
+                    if (!deployedFriendlyUnitQuantities.has(unit.name)) {
                         deployedFriendlyUnitQuantities.set(unit.name, 1);
-                        deployedQuantityDisplay.textContent = 1;
                     }
                 } else {
                     deployedFriendlyUnitQuantities.delete(unit.name);
-                    deployedQuantityDisplay.textContent = 0;
                 }
                 updateAllCalculations();
+                renderSelectionSidebars(); // Re-render to sort
             });
             deployedSelectUnitsDiv.appendChild(deployedCheckboxContainer);
 
-            // Add event listeners for quantity buttons
             deployedCheckboxContainer.querySelectorAll('.quantity-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const unitName = event.target.dataset.unit;
@@ -1657,12 +1637,52 @@
                 });
             });
         });
-        updateAllCalculations(); // Initial calculation after rendering filtered units
     }
+
+    function renderUnitCards(category) {
+        const unitCardsDisplay = document.getElementById('unit-cards-display');
+        unitCardsDisplay.innerHTML = '';
+
+        let filteredUnits = category === 'all' ? unitsData : unitsData.filter(unit => unit.categories.includes(category));
+        filteredUnits.sort((a, b) => a.name.localeCompare(b.name));
+
+        filteredUnits.forEach(unit => {
+            const unitId = unit.name.toLowerCase().replace(/\s/g, '-');
+            const unitCard = document.createElement('div');
+            unitCard.id = `${unitId}-card`;
+            unitCard.className = 'bg-white rounded-lg shadow-lg p-6 cursor-pointer transform transition duration-300 ease-in-out hover:scale-105 unit-card-header';
+            unitCard.innerHTML = `
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">${unit.name}</h3>
+                <p class="text-sm text-gray-500 mb-2 capitalize">
+                    Categories: ${unit.categories.join(', ')}
+                </p>
+                <p class="text-sm text-gray-500 mb-4">
+                    Cost: ${unit.cost} | Tier: ${unit.tier} | Mirror: ${unit.mirrorMatchRating}
+                </p>
+                <div class="counters mt-4 hidden">
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Good Counters:</h4>
+                    <ul class="list-disc list-inside text-gray-700">
+                        ${unit.counters.sort((a, b) => {
+                            const bestRatingA = Math.max(...a.matchups.map(m => getRatingValue(m.rating)));
+                            const bestRatingB = Math.max(...b.matchups.map(m => getRatingValue(m.rating)));
+                            return bestRatingB - bestRatingA;
+                        }).map(counter => formatCounterDisplayForCard(counter)).join('')}
+                    </ul>
+                </div>
+            `;
+            unitCard.addEventListener('click', () => {
+                const countersDiv = unitCard.querySelector('.counters');
+                countersDiv.classList.toggle('hidden');
+            });
+            unitCardsDisplay.appendChild(unitCard);
+        });
+    }
+
 
     // Event listener for the global clear button
     document.addEventListener('DOMContentLoaded', () => {
-        renderUnits('all'); // Initial render of all units
+        renderSelectionSidebars(); // Initial render of selection sidebars
+        renderUnitCards('all'); // Initial render of all unit cards
 
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', (event) => {
@@ -1672,7 +1692,7 @@
                 });
                 event.target.classList.remove('bg-gray-200', 'text-gray-800');
                 event.target.classList.add('bg-gray-700', 'text-white');
-                renderUnits(event.target.dataset.category);
+                renderUnitCards(event.target.dataset.category); // Only re-render unit cards based on category
             });
         });
         document.querySelector('.tab-button[data-category="all"]').click(); // Activate 'All' by default
@@ -1681,7 +1701,8 @@
             selectedEnemyUnitQuantities.clear();
             deployedFriendlyUnitQuantities.clear();
             // Re-render units to update checkbox states and then recalculate
-            renderUnits(document.querySelector('.tab-button.bg-gray-700').dataset.category);
+            renderSelectionSidebars();
+            updateAllCalculations();
         });
 
         // New event listener for the toggle unit cards button
