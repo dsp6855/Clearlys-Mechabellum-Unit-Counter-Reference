@@ -40,7 +40,7 @@
 <body class="bg-gray-100 text-gray-800">
 
 <div class="container mx-auto px-4 py-8 relative">
-    <!-- version="Clearly1.411" 
+    <!-- version="Clearly1.42" 
 	Author:  "Clearly Misunderstood"
 	LinkedIn:  "https://www.linkedin.com/in/dpitts"
 	Date:  8/6/2025
@@ -51,7 +51,7 @@
 	-->
     <!-- Version Number Display -->
     <div class="absolute top-4 right-4 text-xs text-gray-500">
-        version: 1.411
+        version: 1.42
     </div>
     <h1 class="text-3xl md:text-4xl font-bold text-center mb-6">Mechabellum Unit Counter Reference</h1>
     <p class="text-center text-lg max-w-2xl mx-auto mb-8">
@@ -1517,19 +1517,24 @@
             quantityDisplaySpan.textContent = currentQuantity;
         }
         updateAllCalculations();
-        // Re-render the sidebars to apply the new sorting
-        renderSelectionSidebars();
+        // Re-render the sidebars to apply the new sorting and filtering
+        const activeCategoryButton = document.querySelector('.tab-button.bg-gray-700');
+        const activeCategory = activeCategoryButton ? activeCategoryButton.dataset.category : 'all';
+        renderSelectionSidebars(activeCategory);
     }
 
-    function renderSelectionSidebars() {
+    function renderSelectionSidebars(category) {
         const enemySelectUnitsDiv = document.getElementById('enemy-select-units');
         const deployedSelectUnitsDiv = document.getElementById('deployed-select-units');
 
         enemySelectUnitsDiv.innerHTML = '';
         deployedSelectUnitsDiv.innerHTML = '';
 
-        // Sort units for enemy sidebar
-        const sortedEnemyUnits = [...unitsData].sort((a, b) => {
+        // Filter units based on the selected category
+        let filteredUnits = category === 'all' ? unitsData : unitsData.filter(unit => unit.categories.includes(category));
+
+        // Sort units for enemy sidebar: selected first, then alphabetical within the category
+        const sortedEnemyUnits = [...filteredUnits].sort((a, b) => {
             const aSelected = selectedEnemyUnitQuantities.has(a.name);
             const bSelected = selectedEnemyUnitQuantities.has(b.name);
 
@@ -1538,8 +1543,8 @@
             return a.name.localeCompare(b.name);
         });
 
-        // Sort units for deployed sidebar
-        const sortedDeployedUnits = [...unitsData].sort((a, b) => {
+        // Sort units for deployed sidebar: selected first, then alphabetical within the category
+        const sortedDeployedUnits = [...filteredUnits].sort((a, b) => {
             const aSelected = deployedFriendlyUnitQuantities.has(a.name);
             const bSelected = deployedFriendlyUnitQuantities.has(b.name);
 
@@ -1579,7 +1584,9 @@
                     selectedEnemyUnitQuantities.delete(unit.name);
                 }
                 updateAllCalculations();
-                renderSelectionSidebars(); // Re-render to sort
+                const activeCategoryButton = document.querySelector('.tab-button.bg-gray-700');
+                const activeCategory = activeCategoryButton ? activeCategoryButton.dataset.category : 'all';
+                renderSelectionSidebars(activeCategory); // Re-render to sort and filter
             });
             enemySelectUnitsDiv.appendChild(enemyCheckboxContainer);
 
@@ -1624,7 +1631,9 @@
                     deployedFriendlyUnitQuantities.delete(unit.name);
                 }
                 updateAllCalculations();
-                renderSelectionSidebars(); // Re-render to sort
+                const activeCategoryButton = document.querySelector('.tab-button.bg-gray-700');
+                const activeCategory = activeCategoryButton ? activeCategoryButton.dataset.category : 'all';
+                renderSelectionSidebars(activeCategory); // Re-render to sort and filter
             });
             deployedSelectUnitsDiv.appendChild(deployedCheckboxContainer);
 
@@ -1681,8 +1690,9 @@
 
     // Event listener for the global clear button
     document.addEventListener('DOMContentLoaded', () => {
-        renderSelectionSidebars(); // Initial render of selection sidebars
-        renderUnitCards('all'); // Initial render of all unit cards
+        // Initial render of selection sidebars and unit cards with 'all' category
+        renderSelectionSidebars('all');
+        renderUnitCards('all');
 
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', (event) => {
@@ -1692,7 +1702,11 @@
                 });
                 event.target.classList.remove('bg-gray-200', 'text-gray-800');
                 event.target.classList.add('bg-gray-700', 'text-white');
-                renderUnitCards(event.target.dataset.category); // Only re-render unit cards based on category
+
+                const selectedCategory = event.target.dataset.category;
+                renderUnitCards(selectedCategory); // Re-render unit cards based on category
+                renderSelectionSidebars(selectedCategory); // Re-render sidebars based on category
+
                 // Ensure unit cards are visible when a filter is applied
                 const unitCardsDisplay = document.getElementById('unit-cards-display');
                 unitCardsDisplay.classList.remove('hidden');
@@ -1706,7 +1720,9 @@
             selectedEnemyUnitQuantities.clear();
             deployedFriendlyUnitQuantities.clear();
             // Re-render units to update checkbox states and then recalculate
-            renderSelectionSidebars();
+            const activeCategoryButton = document.querySelector('.tab-button.bg-gray-700');
+            const activeCategory = activeCategoryButton ? activeCategoryButton.dataset.category : 'all';
+            renderSelectionSidebars(activeCategory);
             updateAllCalculations();
         });
 
@@ -1725,4 +1741,3 @@
 
 </body>
 </html>
-
