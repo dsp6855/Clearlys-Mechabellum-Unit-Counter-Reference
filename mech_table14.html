@@ -1693,6 +1693,11 @@
                 event.target.classList.remove('bg-gray-200', 'text-gray-800');
                 event.target.classList.add('bg-gray-700', 'text-white');
                 renderUnitCards(event.target.dataset.category); // Only re-render unit cards based on category
+                // Ensure unit cards are visible when a filter is applied
+                const unitCardsDisplay = document.getElementById('unit-cards-display');
+                unitCardsDisplay.classList.remove('hidden');
+                // Also update the toggle button text to reflect visibility
+                document.getElementById('toggle-unit-cards-btn').textContent = 'Hide Unit Cards';
             });
         });
         document.querySelector('.tab-button[data-category="all"]').click(); // Activate 'All' by default
