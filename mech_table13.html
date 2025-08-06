@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- version="Clearly1.30" 
+	Author:  "Clearly Misunderstood"
+	LinkedIn:  "https://www.linkedin.com/in/dpitts"
+	Date:  8/6/2025
+	Special thanks to Rask Vann for his assistance.
+	License:  Creative Commons BY-NC-SA - i.e. allows anyone to distribute, remix, adapt, and build
+		on this work for non-commercial purposes as long as they give appropriate credit to the 
+		original creator, and that derivative works be shared under these same terms.
+	-->
+    <title>Mechabellum Unit Counter Reference, by Clearly Misunderstood, Aug 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5DC;
+        }
+        /* Apply sticky positioning to individual sidebar containers */
+        .sticky-sidebar {
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            z-index: 10;
+        }
+        .unit-card-header {
+            scroll-margin-top: 80px;
+        }
+        .quantity-btn {
+            width: 24px; /* Fixed width for buttons */
+            height: 24px; /* Fixed height for buttons */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none; /* Prevent text selection on double click */
+        }
+        .quantity-display {
+            min-width: 24px; /* Ensure space for numbers */
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-6">Mechabellum Unit Counter Reference</h1>
+    <p class="text-center text-lg max-w-2xl mx-auto mb-8">
+        This interactive guide provides a quick reference for all Mechabellum units and their common counters. Click on a unit card to see its counters.
+    </p>
+
+    <!-- Global Clear All Selections Button -->
+    <div class="flex justify-center mb-4">
+        <button id="clear-all-selections-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out">
+            Clear All Selections
+        </button>
+    </div>
+
+    <!-- New Toggle Unit Cards Button -->
+    <div class="flex justify-center mb-8">
+        <button id="toggle-unit-cards-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out">
+            Toggle Unit Cards
+        </button>
+    </div>
+
+    <!-- Filter buttons for categories -->
+    <div class="flex flex-wrap justify-center gap-2 mb-8">
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="all">All</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="light">Light</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="medium">Medium</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="heavy">Heavy</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="giant">Giant</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="special">Special</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="ground">Ground</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="air">Air</button>
+        <button class="tab-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" data-category="rocket">Rocket</button>
+    </div>
+
+    <!-- Main content area: Left Sidebar (Enemy) + Central Content + Right Sidebar (Deployed) -->
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Left Sidebar for Enemy Units -->
+        <div class="md:w-64 flex-shrink-0 sticky-sidebar">
+            <div id="sidebar-enemy-units" class="bg-gray-50 p-4 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Select Enemy Units:</h3>
+                <div id="enemy-select-units" class="space-y-1 text-sm">
+                    <!-- Checkboxes for enemy units will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Central Content Area -->
+        <div class="flex flex-col flex-grow gap-6">
+            <!-- New Air Vulnerability/Advantage Display Area -->
+            <div id="air-vulnerability-display">
+                <!-- Warnings/Advantages will be displayed here -->
+            </div>
+
+            <!-- New Deployment Suggestions Area -->
+            <div id="deployment-suggestions-results" class="p-3 bg-blue-100 rounded-md shadow-inner">
+                <h4 class="font-semibold text-blue-800 mb-2">Deployment Suggestions:</h4>
+                <ul id="deployment-suggestions-list" class="list-disc list-inside text-blue-700">
+                    <li class="text-gray-600">Select enemy units and your deployed units to get suggestions.</li>
+                </ul>
+            </div>
+
+            <!-- Existing Minimum Counters for Selected Enemy Units -->
+            <div id="common-counters-results" class="p-3 bg-gray-200 rounded-md shadow-inner">
+                <h4 class="font-semibold text-gray-800 mb-2">Minimum Counters for Selected Enemy Units:</h4>
+                <ul id="common-counters-list" class="list-disc list-inside text-gray-700">
+                    <li class="text-gray-600">Select units from the "Select Enemy Units" list.</li>
+                </ul>
+            </div>
+
+            <!-- New: My Uncountered Deployed Units -->
+            <div id="uncountered-deployed-results" class="p-3 bg-red-100 rounded-md shadow-inner">
+                <h4 class="font-semibold text-red-800 mb-2">My Uncountered Deployed Units:</h4>
+                <ul id="uncountered-deployed-list" class="list-disc list-inside text-red-700">
+                    <li class="text-gray-600">Select enemy units and your deployed units to see uncountered units.</li>
+                </ul>
+            </div>
+
+            <div id="unit-cards-display" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Individual unit cards will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Right Sidebar for My Deployed Units -->
+        <div class="md:w-64 flex-shrink-0 sticky-sidebar">
+            <div id="sidebar-deployed-units" class="bg-gray-50 p-4 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Select My Deployed Units:</h3>
+                <div id="deployed-select-units" class="space-y-1 text-sm">
+                    <!-- Checkboxes for deployed units will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About this guide section -->
+    <div class="mt-12 p-6 bg-gray-200 rounded-lg shadow-inner">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">About This Guide</h2>
+        <p class="text-gray-700 leading-relaxed">This guide provides general counter recommendations. "Counters" are units that typically perform well against the listed unit. However, the effectiveness of a counter can be heavily influenced by:</p>
+        <ul class="list-disc list-inside text-gray-700 mt-3 space-y-1">
+            <li>**Unit Upgrades (Techs):** Many units gain powerful abilities or stat boosts that can flip unfavorable matchups.</li>
+            <li>**Positioning:** Where units are placed on the battlefield can dramatically alter engagements.</li>
+            <li>**Army Composition:** The overall synergy and balance of your army, including supporting units and abilities, are critical.</li>
+            <li>**Player Skill & Adaptation:** Anticipating your opponent's moves and adjusting your strategy is often more important than relying solely on hard counters.</li>
+        </ul>
+        <p class="text-gray-700 leading-relaxed mt-3">Use this table as a starting point for understanding unit interactions and developing your own winning strategies.</p>
+    </div>
+
+    <!-- New: Understanding Tiers and Effectiveness Ratings -->
+    <div class="mt-8 p-6 bg-gray-200 rounded-lg shadow-inner">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Understanding Tiers and Effectiveness Ratings</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Unit Tiers (S, A, B, C, D)</h3>
+        <p class="text-gray-700 leading-relaxed mb-3">
+            Unit Tiers represent a unit's **overall general utility, flexibility, and power level** within the game's meta.
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-1 mb-4">
+            <li>**S-Tier:** Top-tier, highly flexible, powerful, and generally strong in many situations.</li>
+            <li>**A-Tier:** Very strong and reliable, performing exceptionally well in their intended roles.</li>
+            <li>**B-Tier:** Solid, viable units with clear strengths, effective when used correctly.</li>
+            <li>**C-Tier:** Situational units, effective in specific compositions but might struggle generally.</li>
+            <li>**D-Tier:** Generally weaker or highly niche units, often outclassed by other options.</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Effectiveness Ratings (S, A, B, C, D, E)</h3>
+        <p class="text-gray-700 leading-relaxed mb-3">
+            Effectiveness Ratings indicate **how well a specific counter unit performs against a particular enemy unit** in a direct matchup.
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-1">
+            <li>**S (Hard Counter):** Exceptional, dominates the matchup with significant health remaining.</li>
+            <li>**A (Strong Counter):** Very good performance, wins most engagements and retains good health.</li>
+            <li>**B (Good Counter):** Wins the matchup, but might take considerable damage (~50% HP left).</li>
+            <li>**C (Marginal Counter):** Barely wins, often left with very low health; high-risk.</li>
+            <li>**D (Loses, but Damages)::** Loses the matchup, but deals significant damage before defeat. This rating also applies to **mirror matches** where units are expected to tie or mutually destroy each other.</li>
+            <li>**E (Ineffective):** Highly ineffective, quickly defeated with little to no impact.</li>
+        </ul>
+        <p class="text-gray-700 leading-relaxed mt-3">
+            **Note on Quantity:** The counter logic now considers the quantity of enemy units. Effectiveness ratings and **recommended quantities** for deployment are provided for "Low," "Medium," and "High" quantity bands, allowing for more precise recommendations based on the scale of the threat.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Helper to determine quantity band for a unit
+    function getQuantityBand(unitName, quantity) {
+        // Define quantity bands based on unit type (squad vs single)
+        const squadUnits = ["Crawler", "Fang", "Wasp", "Mustang", "Hound", "Sledgehammer", "Steel Ball", "Tarantula", "Fire Badger", "Void Eye"];
+        const singleUnits = ["Rhino", "Marksman", "Arclight", "Stormcaller", "Sabertooth", "Farseer", "Scorpion", "Vulcan", "Melting Point", "Fortress", "Wraith", "Sandworm", "Typhoon", "Raiden", "Overlord", "Abyss", "Mountain", "War Factory", "Hacker", "Phantom Ray", "Phoenix"];
+
+        if (squadUnits.includes(unitName)) {
+            if (quantity >= 6) return "High";
+            if (quantity >= 3) return "Medium";
+            if (quantity >= 1) return "Low";
+        } else if (singleUnits.includes(unitName)) {
+            if (quantity >= 3) return "High";
+            if (quantity >= 2) return "Medium";
+            if (quantity >= 1) return "Low";
+        }
+        return null; // Should not happen if quantity > 0
+    }
+
+    // Helper to get the recommended quantity for a counter unit based on its rating
+    function getRecommendedQuantityForCounter(counterUnitName, rating) {
+        const squadUnits = ["Crawler", "Fang", "Wasp", "Mustang", "Hound", "Sledgehammer", "Steel Ball", "Tarantula", "Fire Badger", "Void Eye"];
+        const isSquadUnit = squadUnits.includes(counterUnitName);
+
+        if (isSquadUnit) {
+            switch (rating) {
+                case "S": return "1-2 squads";
+                case "A": return "2-3 squads";
+                case "B": return "3-4 squads";
+                case "C": return "4-5+ squads";
+                default: return "N/A";
+            }
+        } else { // Single unit
+            switch (rating) {
+                case "S": return "1 unit";
+                case "A": return "1 unit";
+                case "B": return "1-2 units";
+                case "C": return "2-3 units";
+                default: return "N/A";
+            }
+        }
+    }
+
+    const unitsData = [
+        // Light Units
+        { name: "Crawler", categories: ["light", "ground"], cost: 100, tier: "S", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Arclight", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "B") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") },
+                    { quantityBand: "High", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") }
+                ]},
+                { unit: "Wraith", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wraith", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wraith", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wraith", "D") }
+                ]},
+                { unit: "Hound", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") }
+                ]},
+                { unit: "Fang", matchups: [ // Added Fang with Shield Tech as a counter to Crawler
+                    { quantityBand: "Low", rating: "A", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "C") }
+                ]}
+            ]
+        },
+        { name: "Fang", categories: ["light", "ground"], cost: 100, tier: "A", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Arclight", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "C") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") }
+                ]},
+                { unit: "Rhino", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "C") }
+                ]},
+                { unit: "Hound", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "A") }
+                ]}
+            ]
+        },
+        { name: "Hound", categories: ["light", "ground"], cost: 100, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Fire Badger", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "C") }
+                ]},
+                { unit: "Rhino", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "D") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "D") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") }
+                ]},
+                { unit: "Void Eye", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Void Eye", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Void Eye", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Void Eye", "A") }
+                ]}
+            ]
+        },
+        { name: "Mustang", categories: ["light", "ground"], cost: 100, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "B") }
+                ]},
+                { unit: "Fire Badger", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fire Badger", "D") }
+                ]},
+                { unit: "Tarantula", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Tarantula", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Tarantula", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Tarantula", "D") }
+                ]}
+            ]
+        },
+        { name: "Wasp", categories: ["light", "air"], cost: 100, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Mustang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "B") }
+                ]},
+                { unit: "Phoenix", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "D") }
+                ]},
+                { unit: "Marksman", matchups: [ // Adjusted Marksman effectiveness against Wasp
+                    { quantityBand: "Low", rating: "C", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "C") },
+                    { quantityBand: "Medium", rating: "D", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "D") },
+                    { quantityBand: "High", rating: "E", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "E") }
+                ]},
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") }
+                ]},
+                { unit: "Fang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") }
+                ]}
+            ]
+        },
+        // Medium Units
+        { name: "Sledgehammer", categories: ["medium", "ground"], cost: 200, tier: "B", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") }
+                ]},
+                { unit: "Raiden", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]}
+            ]
+        },
+        { name: "Steel Ball", categories: ["medium", "ground"], cost: 200, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") }
+                ]},
+                { unit: "Raiden", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Arclight", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: "Charge Shot", recommendedQuantity: getRecommendedQuantityForCounter("Arclight", "A") }
+                ]}
+            ]
+        },
+        { name: "Rhino", categories: ["medium", "ground"], cost: 200, tier: "C", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "D") }
+                ]}
+            ]
+        },
+        { name: "Marksman", categories: ["medium", "ground"], cost: 200, tier: "C", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Wasp", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "C") }
+                ]},
+                { unit: "Phoenix", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "D") }
+                ]},
+                { unit: "Phantom Ray", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phantom Ray", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phantom Ray", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phantom Ray", "D") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") }
+                ]},
+                { unit: "Crawler", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "B") }
+                ]},
+                { unit: "Fang", matchups: [ // Added Fang with Range Tech as a counter to Marksman
+                    { quantityBand: "Low", rating: "A", techRequired: "Range Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Range Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Range Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "C") }
+                ]}
+            ]
+        },
+        { name: "Arclight", categories: ["light", "ground"], cost: 200, tier: "C", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Fang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Shield Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "C") }
+                ]},
+                { unit: "Mustang", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "D") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") }
+                ]}
+            ]
+        },
+        { name: "Stormcaller", categories: ["medium", "ground", "rocket"], cost: 200, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Mustang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Anti-Missile Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Anti-Missile Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Anti-Missile Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "C") }
+                ]},
+                { unit: "Sabertooth", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Sabertooth", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Sabertooth", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Sabertooth", "B") }
+                ]},
+                { unit: "Phoenix", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "C") }
+                ]},
+                { unit: "Raiden", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "D") }
+                ]},
+                { unit: "Crawler", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Mobile Beacon", recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: "Mobile Beacon", recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: "Mobile Beacon", recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "A") }
+                ]}
+            ]
+        },
+        { name: "Tarantula", categories: ["medium", "ground"], cost: 200, tier: "D", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Fortress", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Sabertooth", categories: ["medium", "ground"], cost: 200, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "D") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "D") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Farseer", categories: ["medium", "ground", "rocket"], cost: 200, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Fortress", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "C") }
+                ]},
+                { unit: "Rhino", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "D") }
+                ]},
+                { unit: "War Factory", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "D") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]}
+            ]
+        },
+        // Heavy Units
+        { name: "Scorpion", categories: ["medium", "ground"], cost: 300, tier: "D", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Fortress", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fortress", "D") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Rhino", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "D") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Vulcan", categories: ["heavy", "ground"], cost: 400, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "D") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "D") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "Medium", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") },
+                    { quantityBand: "High", rating: "E", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "E") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Melting Point", categories: ["heavy", "ground"], cost: 400, tier: "A", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Raiden", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "D") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Fortress", categories: ["heavy", "ground"], cost: 400, tier: "S", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]},
+                { unit: "Fang", matchups: [ // Added Fang with 150 Fire Damage Tech as a counter to Fortress
+                    { quantityBand: "Low", rating: "A", techRequired: "150 Fire Damage Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "150 Fire Damage Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "150 Fire Damage Tech", recommendedQuantity: getRecommendedQuantityForCounter("Fang", "C") }
+                ]}
+            ]
+        },
+        { name: "Wraith", categories: ["heavy", "air"], cost: 300, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") }
+                ]}
+            ]
+        },
+        { name: "Sandworm", categories: ["heavy", "ground"], cost: 400, tier: "D", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "War Factory", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("War Factory", "C") }
+                ]},
+                { unit: "Phoenix", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "D") }
+                ]}
+            ]
+        },
+        { name: "Typhoon", categories: ["medium", "ground"], cost: 400, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "C") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "D") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Raiden", categories: ["heavy", "air"], cost: 400, tier: "A", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "D") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "D") }
+                ]}
+            ]
+        },
+        // Giant Units
+        { name: "Overlord", categories: ["heavy", "air", "rocket"], cost: 500, tier: "S", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "D") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") }
+                ]}
+            ]
+        },
+        { name: "Abyss", categories: ["giant", "air"], cost: 500, tier: "S", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Phoenix", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Phoenix", "D") }
+                ]},
+                { unit: "Marksman", matchups: [ // Added Anti-Air Tech for Marksman against Abyss
+                    { quantityBand: "Low", rating: "B", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "D") }
+                ]},
+                { unit: "Wasp", matchups: [
+                    { quantityBand: "Low", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "C") },
+                    { quantityBand: "Medium", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "D") },
+                    { quantityBand: "High", rating: "E", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Wasp", "E") }
+                ]}
+            ]
+        },
+        { name: "Mountain", categories: ["giant", "ground"], cost: 500, tier: "S", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]}
+            ]
+        },
+        // Special Units
+        { name: "War Factory", categories: ["special", "ground", "giant"], cost: 500, tier: "S", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") }
+                ]},
+                { unit: "Hacker", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hacker", "D") }
+                ]}
+            ]
+        },
+        { name: "Fire Badger", categories: ["special", "ground", "medium"], cost: 200, tier: "A", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Rhino", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Rhino", "C") }
+                ]},
+                { unit: "Scorpion", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Scorpion", "D") }
+                ]},
+                { unit: "Typhoon", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Typhoon", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Typhoon", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Typhoon", "D") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "C") },
+                    { quantityBand: "Medium", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "D") },
+                    { quantityBand: "High", rating: "E", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "E") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") },
+                    { quantityBand: "High", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "A") }
+                ]}
+            ]
+        },
+        { name: "Hacker", categories: ["special", "ground", "medium"], cost: 200, tier: "D", mirrorMatchRating: "D", canAttackAir: false,
+            counters: [
+                { unit: "Anti-Interference Module", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Tech", recommendedQuantity: getRecommendedQuantityForCounter("Anti-Interference Module", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Tech", recommendedQuantity: getRecommendedQuantityForCounter("Anti-Interference Module", "S") },
+                    { quantityBand: "High", rating: "S", techRequired: "Tech", recommendedQuantity: getRecommendedQuantityForCounter("Anti-Interference Module", "S") }
+                ]},
+                { unit: "Vulcan", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Vulcan", "C") }
+                ]},
+                { unit: "Stormcaller", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Stormcaller", "D") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "D") }
+                ]}
+            ]
+        },
+        { name: "Phantom Ray", categories: ["medium", "air"], cost: 200, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "C") }
+                ]},
+                { unit: "Melting Point", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Melting Point", "D") }
+                ]},
+                { unit: "Overlord", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Overlord", "D") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") }
+                ]}
+            ]
+        },
+        { name: "Void Eye", categories: ["special", "ground", "air", "light"], cost: 100, tier: "C", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Crawler", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Crawler", "C") }
+                ]},
+                { unit: "Fang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Fang", "C") }
+                ]},
+                { unit: "Hound", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Hound", "D") }
+                ]},
+                { unit: "Mustang", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "D") }
+                ]}
+            ]
+        },
+        { name: "Phoenix", categories: ["medium", "air"], cost: 200, tier: "B", mirrorMatchRating: "D", canAttackAir: true,
+            counters: [
+                { unit: "Mustang", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Mustang", "C") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "Medium", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") },
+                    { quantityBand: "High", rating: "B", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "B") }
+                ]},
+                { unit: "Farseer", matchups: [
+                    { quantityBand: "Low", rating: "A", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "A") },
+                    { quantityBand: "Medium", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "B") },
+                    { quantityBand: "High", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Farseer", "C") }
+                ]},
+                { unit: "Raiden", matchups: [
+                    { quantityBand: "Low", rating: "B", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "B") },
+                    { quantityBand: "Medium", rating: "C", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "C") },
+                    { quantityBand: "High", rating: "D", techRequired: null, recommendedQuantity: getRecommendedQuantityForCounter("Raiden", "D") }
+                ]},
+                { unit: "Marksman", matchups: [
+                    { quantityBand: "Low", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "Medium", rating: "S", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "S") },
+                    { quantityBand: "High", rating: "A", techRequired: "Anti-Air Tech", recommendedQuantity: getRecommendedQuantityForCounter("Marksman", "A") }
+                ]}
+            ]
+        }
+    ];
+
+    // Store selected unit names and their quantities globally
+    let selectedEnemyUnitQuantities = new Map(); // Map<UnitName, Quantity>
+    let deployedFriendlyUnitQuantities = new Map(); // Map<UnitName, Quantity>
+
+    // Helper function to convert rating letters to numerical values for sorting
+    function getRatingValue(rating) {
+        const ratings = { 'S': 5, 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'E': 0, 'N/A': -1 };
+        return ratings[rating] || -1; // Default to -1 for N/A or unknown
+    }
+
+    // Helper to determine quantity band for a unit
+    function getQuantityBand(unitName, quantity) {
+        // Define quantity bands based on unit type (squad vs single)
+        const squadUnits = ["Crawler", "Fang", "Wasp", "Mustang", "Hound", "Sledgehammer", "Steel Ball", "Tarantula", "Fire Badger", "Void Eye"];
+        // All other units are treated as single/heavy/giant for quantity banding
+        const singleUnits = unitsData.map(u => u.name).filter(name => !squadUnits.includes(name));
+
+        if (squadUnits.includes(unitName)) {
+            if (quantity >= 6) return "High";
+            if (quantity >= 3) return "Medium";
+            if (quantity >= 1) return "Low";
+        } else if (singleUnits.includes(unitName)) {
+            if (quantity >= 3) return "High";
+            if (quantity >= 2) return "Medium";
+            if (quantity >= 1) return "Low";
+        }
+        return null; // Should not happen if quantity > 0 and unit is in unitsData
+    }
+
+    // Helper to get the specific rating for a counter against an enemy unit at a given quantity
+    function getCounterRatingForEnemyQuantity(counterMatchups, enemyUnitName, enemyQuantity) {
+        const quantityBand = getQuantityBand(enemyUnitName, enemyQuantity);
+        if (!quantityBand) return { rating: 'N/A', techRequired: null, recommendedQuantity: 'N/A' };
+
+        // Find the matchup that matches the quantity band
+        const matchup = counterMatchups.find(m => m.quantityBand === quantityBand);
+        return matchup || { rating: 'N/A', techRequired: null, recommendedQuantity: 'N/A' };
+    }
+
+    function formatCounterDisplay(counterInfo) {
+        let display = `<strong>${counterInfo.unit}</strong>`;
+        if (counterInfo.rating) {
+            display += ` (${counterInfo.rating})`;
+        }
+        if (counterInfo.recommendedQuantity) {
+            display += `, deploy ${counterInfo.recommendedQuantity}`;
+        }
+        if (counterInfo.techRequired) {
+            display += `, with ${counterInfo.techRequired}`;
+        }
+        return display;
+    }
+
+    // New helper to format counter display for unit cards showing all quantity bands
+    function formatCounterDisplayForCard(counter) {
+        let html = `<li><strong>${counter.unit}</strong>: `;
+        const matchupsHtml = counter.matchups.map(m => {
+            let tech = m.techRequired ? `, with ${m.techRequired}` : '';
+            let recommendedQty = m.recommendedQuantity ? `, deploy ${m.recommendedQuantity}` : '';
+            return `${m.quantityBand} (${m.rating})${recommendedQty}${tech}`;
+        }).join('; ');
+        html += `${matchupsHtml}</li>`;
+        return html;
+    }
+
+    function calculateDeploymentSuggestions() {
+        const deploymentSuggestionsList = document.getElementById('deployment-suggestions-list');
+        deploymentSuggestionsList.innerHTML = ''; // Clear previous results
+
+        if (selectedEnemyUnitQuantities.size === 0) {
+            deploymentSuggestionsList.innerHTML = '<li class="text-gray-600">Select enemy units to get deployment suggestions.</li>';
+            return;
+        }
+
+        let allPotentialCounters = new Map(); // Map<CounterUnitName, { bestRatingInfo: CounterMatchupObject, enemyUnitsCovered: Set<EnemyUnitName> }>
+        selectedEnemyUnitQuantities.forEach((enemyQuantity, enemyName) => {
+            const enemyUnit = unitsData.find(u => u.name === enemyName);
+            if (enemyUnit) {
+                enemyUnit.counters.forEach(counter => {
+                    const counterRatingInfo = getCounterRatingForEnemyQuantity(counter.matchups, enemyName, enemyQuantity);
+
+                    if (counterRatingInfo.rating !== 'E' && counterRatingInfo.rating !== 'D' && counterRatingInfo.rating !== 'N/A') { // Only suggest effective counters
+                        if (!allPotentialCounters.has(counter.unit)) {
+                            allPotentialCounters.set(counter.unit, {
+                                bestRatingInfo: counterRatingInfo,
+                                enemyUnitsCovered: new Set()
+                            });
+                        }
+                        // Update the best rating for this counter if the current one is better
+                        const existingCounterEntry = allPotentialCounters.get(counter.unit);
+                        if (getRatingValue(counterRatingInfo.rating) > getRatingValue(existingCounterEntry.bestRatingInfo.rating)) {
+                            existingCounterEntry.bestRatingInfo = counterRatingInfo;
+                        }
+                        existingCounterEntry.enemyUnitsCovered.add(enemyName);
+                    }
+                });
+            }
+        });
+
+        let finalSuggestions = [];
+        allPotentialCounters.forEach((value, counterUnitName) => {
+            if (!deployedFriendlyUnitQuantities.has(counterUnitName)) {
+                finalSuggestions.push({
+                    unit: counterUnitName,
+                    rating: value.bestRatingInfo.rating,
+                    techRequired: value.bestRatingInfo.techRequired,
+                    recommendedQuantity: value.bestRatingInfo.recommendedQuantity, // Include recommended quantity
+                    covers: Array.from(value.enemyUnitsCovered).sort()
+                });
+            }
+        });
+
+        if (finalSuggestions.length === 0) {
+            deploymentSuggestionsList.innerHTML = '<li class="text-gray-600">Your deployed units already counter all selected enemies, or no additional counters are available.</li>';
+        } else {
+            // Sort by rating descending, then by name ascending
+            finalSuggestions.sort((a, b) => {
+                const ratingDiff = getRatingValue(b.rating) - getRatingValue(a.rating);
+                if (ratingDiff !== 0) return ratingDiff;
+                return a.unit.localeCompare(b.unit);
+            }).forEach(suggestionInfo => {
+                const li = document.createElement('li');
+                li.innerHTML = `${formatCounterDisplay(suggestionInfo)} (Counters: ${suggestionInfo.covers.join(', ')})`;
+                deploymentSuggestionsList.appendChild(li);
+            });
+        }
+    }
+
+    function calculateMinimumCounters() {
+        const commonCountersList = document.getElementById('common-counters-list');
+        commonCountersList.innerHTML = ''; // Clear previous results
+
+        if (selectedEnemyUnitQuantities.size === 0) {
+            commonCountersList.innerHTML = '<li class="text-gray-600">Select units from the "Select Enemy Units" list.</li>';
+            return;
+        }
+
+        let uncoveredSelectedUnits = new Set(selectedEnemyUnitQuantities.keys());
+        let chosenCounters = [];
+
+        // Map<CounterUnitName, { info: {unit, rating, techRequired, recommendedQuantity}, covers: Set<SelectedEnemyUnitName> }>
+        const potentialCountersMap = new Map();
+
+        unitsData.forEach(unit => { // Iterate through all units to find their counter capabilities
+            unit.counters.forEach(counter => {
+                const counterUnitName = counter.unit;
+                // For each counter, find which of the *currently selected enemy* units it effectively counters
+                const unitsThisCounterEffectivelyCovers = unitsData.filter(enemyUnit => {
+                    if (!selectedEnemyUnitQuantities.has(enemyUnit.name)) return false; // Only consider selected enemies
+
+                    const enemyQuantity = selectedEnemyUnitQuantities.get(enemyUnit.name);
+                    const specificMatchup = counter.matchups.find(m => m.quantityBand === getQuantityBand(enemyUnit.name, enemyQuantity));
+
+                    // Only consider if the counter is effective (not E, D, or N/A) against this specific quantity
+                    return specificMatchup && getRatingValue(specificMatchup.rating) >= getRatingValue('C'); // C or better
+                }).map(enemyUnit => enemyUnit.name);
+
+                if (unitsThisCounterEffectivelyCovers.length > 0) {
+                    // Get the best rating and recommended quantity for this counter across all enemies it effectively covers
+                    let bestOverallRating = 'E'; // Start with lowest
+                    let bestTechRequired = null;
+                    let bestRecommendedQuantity = 'N/A';
+
+                    unitsThisCounterEffectivelyCovers.forEach(enemyNameCovered => {
+                        const enemyQuantityCovered = selectedEnemyUnitQuantities.get(enemyNameCovered);
+                        const enemyUnitCovered = unitsData.find(u => u.name === enemyNameCovered);
+                        if (enemyUnitCovered) {
+                            const counterMatchupForEnemy = enemyUnitCovered.counters.find(c => c.unit === counterUnitName);
+                            if (counterMatchupForEnemy) {
+                                const specificMatchup = counterMatchupForEnemy.matchups.find(m => m.quantityBand === getQuantityBand(enemyUnitCovered.name, enemyQuantityCovered));
+                                if (specificMatchup && getRatingValue(specificMatchup.rating) > getRatingValue(bestOverallRating)) {
+                                    bestOverallRating = specificMatchup.rating;
+                                    bestTechRequired = specificMatchup.techRequired;
+                                    bestRecommendedQuantity = specificMatchup.recommendedQuantity;
+                                }
+                            }
+                        }
+                    });
+
+                    if (!potentialCountersMap.has(counterUnitName)) {
+                        potentialCountersMap.set(counterUnitName, {
+                            info: { unit: counterUnitName, rating: bestOverallRating, techRequired: bestTechRequired, recommendedQuantity: bestRecommendedQuantity },
+                            covers: new Set()
+                        });
+                    }
+                    unitsThisCounterEffectivelyCovers.forEach(enemyUnitName => {
+                        potentialCountersMap.get(counterUnitName).covers.add(enemyUnitName);
+                    });
+                }
+            });
+        });
+
+        // Greedy algorithm for set cover
+        while (uncoveredSelectedUnits.size > 0) {
+            let bestCounterName = null;
+            let maxNewCoverage = 0;
+            let unitsCoveredByBest = new Set();
+            let bestCounterInfo = null;
+
+            for (const [counterName, data] of potentialCountersMap.entries()) {
+                let currentNewCoverage = 0;
+                let tempCoveredUnits = new Set();
+
+                for (const unitName of data.covers) {
+                    if (uncoveredSelectedUnits.has(unitName)) {
+                        currentNewCoverage++;
+                        tempCoveredUnits.add(unitName);
+                    }
+                }
+
+                // Prioritize by max new coverage, then by best rating, then alphabetically
+                if (currentNewCoverage > maxNewCoverage ||
+                    (currentNewCoverage === maxNewCoverage && bestCounterInfo && getRatingValue(data.info.rating) > getRatingValue(bestCounterInfo.rating)) ||
+                    (currentNewCoverage === maxNewCoverage && bestCounterInfo && getRatingValue(data.info.rating) === getRatingValue(bestCounterInfo.rating) && counterName.localeCompare(bestCounterName) < 0)) {
+                    maxNewCoverage = currentNewCoverage;
+                    bestCounterName = counterName;
+                    unitsCoveredByBest = tempCoveredUnits;
+                    bestCounterInfo = data.info;
+                }
+            }
+
+            if (bestCounterName === null || maxNewCoverage === 0) {
+                if (uncoveredSelectedUnits.size > 0) {
+                    commonCountersList.innerHTML = '<li class="text-red-600">Could not find effective counters for all selected enemy units.</li>';
+                }
+                break;
+            }
+
+            chosenCounters.push({
+                info: bestCounterInfo,
+                covers: Array.from(unitsCoveredByBest).sort()
+            });
+
+            unitsCoveredByBest.forEach(unitName => {
+                uncoveredSelectedUnits.delete(unitName);
+            });
+
+            potentialCountersMap.delete(bestCounterName);
+        }
+
+        if (chosenCounters.length === 0 && selectedEnemyUnitQuantities.size > 0) {
+             commonCountersList.innerHTML = '<li class="text-gray-600">No effective minimum set of counters found for selected enemy units.</li>';
+        } else if (chosenCounters.length === 0 && selectedEnemyUnitQuantities.size === 0) {
+            commonCountersList.innerHTML = '<li class="text-gray-600">Select units from the "Select Enemy Units" list.</li>';
+        }
+        else {
+            // Final sort by rating descending, then by name ascending
+            chosenCounters.sort((a, b) => {
+                const ratingDiff = getRatingValue(b.info.rating) - getRatingValue(a.info.rating);
+                if (ratingDiff !== 0) return ratingDiff;
+                return a.info.unit.localeCompare(b.info.unit);
+            }).forEach(counterData => {
+                const li = document.createElement('li');
+                li.innerHTML = `${formatCounterDisplay(counterData.info)} (Counters: ${counterData.covers.join(', ')})`;
+                commonCountersList.appendChild(li);
+            });
+        }
+    }
+
+    function calculateUncounteredDeployedUnits() {
+        const uncounteredDeployedList = document.getElementById('uncountered-deployed-list');
+        uncounteredDeployedList.innerHTML = '';
+
+        if (deployedFriendlyUnitQuantities.size === 0) {
+            uncounteredDeployedList.innerHTML = '<li class="text-gray-600">Select your deployed units to see which are uncountered.</li>';
+            return;
+        }
+        if (selectedEnemyUnitQuantities.size === 0) {
+            uncounteredDeployedList.innerHTML = '<li class="text-gray-600">Select enemy units to determine uncountered deployed units.</li>';
+            return;
+        }
+
+        let trulyUncountered = new Set();
+        deployedFriendlyUnitQuantities.forEach((myQuantity, myDeployedUnitName) => {
+            let isEffectivelyCounteredByAnyEnemy = false;
+            for (const [enemyName, enemyQuantity] of selectedEnemyUnitQuantities.entries()) {
+                const enemyUnit = unitsData.find(u => u.name === enemyName);
+                const myUnit = unitsData.find(u => u.name === myDeployedUnitName);
+
+                if (enemyUnit && myUnit) {
+                    // Check if *this specific enemy unit at its quantity* effectively counters *my deployed unit at its quantity*
+                    // This inverse check is more complex. For simplicity in "uncountered", we check if the enemy *could* counter it.
+                    // A unit is "countered" if an enemy unit lists it as a counter with a rating of C or better.
+                    const enemyCountersMyUnit = enemyUnit.counters.find(c => c.unit === myDeployedUnitName);
+                    if (enemyCountersMyUnit) {
+                        const matchup = getCounterRatingForEnemyQuantity(enemyCountersMyUnit.matchups, myDeployedUnitName, myQuantity);
+                        if (getRatingValue(matchup.rating) >= getRatingValue('C')) { // If enemy effectively counters my unit
+                            isEffectivelyCounteredByAnyEnemy = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!isEffectivelyCounteredByAnyEnemy) {
+                trulyUncountered.add(myDeployedUnitName);
+            }
+        });
+
+        if (trulyUncountered.size === 0) {
+            uncounteredDeployedList.innerHTML = '<li class="text-gray-600">All your deployed units are currently being effectively countered by selected enemy units.</li>';
+        } else {
+            Array.from(trulyUncountered).sort().forEach(unitName => {
+                const li = document.createElement('li');
+                li.textContent = unitName;
+                uncounteredDeployedList.appendChild(li);
+            });
+        }
+    }
+
+    function checkAirVulnerabilityAndSuggest() {
+        const airVulnerabilityDisplay = document.getElementById('air-vulnerability-display');
+        airVulnerabilityDisplay.innerHTML = ''; // Clear previous warnings
+
+        let enemyHasAirUnits = false;
+        selectedEnemyUnitQuantities.forEach((quantity, unitName) => {
+            const unit = unitsData.find(u => u.name === unitName);
+            if (unit && unit.categories.includes("air") && quantity > 0) {
+                enemyHasAirUnits = true;
+            }
+        });
+
+        let friendlyHasAirDefense = false;
+        deployedFriendlyUnitQuantities.forEach((quantity, unitName) => {
+            const unit = unitsData.find(u => u.name === unitName);
+            if (unit && (unit.categories.includes("air") || unit.canAttackAir) && quantity > 0) {
+                friendlyHasAirDefense = true;
+            }
+        });
+
+        let friendlyHasAirUnits = false;
+        deployedFriendlyUnitQuantities.forEach((quantity, unitName) => {
+            const unit = unitsData.find(u => u.name === unitName);
+            if (unit && unit.categories.includes("air") && quantity > 0) {
+                friendlyHasAirUnits = true;
+            }
+        });
+
+        let enemyHasAirDefense = false;
+        selectedEnemyUnitQuantities.forEach((quantity, unitName) => {
+            const unit = unitsData.find(u => u.name === unitName);
+            if (unit && (unit.categories.includes("air") || unit.canAttackAir) && quantity > 0) {
+                enemyHasAirDefense = true;
+            }
+        });
+
+        // Scenario 1: Enemy has air units, but friendly has no air defense
+        if (enemyHasAirUnits && !friendlyHasAirDefense) {
+            airVulnerabilityDisplay.innerHTML = `
+                <div class="bg-red-200 text-red-800 p-3 rounded-md shadow-inner mb-4">
+                    <h4 class="font-semibold text-red-900 mb-2">🚨 Warning: Your deployed units lack air defense!</h4>
+                    <p>The enemy has air units, but your current deployment doesn't include units capable of attacking air targets (either air units or ground units with anti-air capability).</p>
+                    <p class="mt-2">Consider adding units like: <strong>Fang, Marksman, Farseer, Arclight, Melting Point, Mustang, Sandworm</strong> (ground-based anti-air) or air units such as <strong>Wasp, Wraith, Raiden, Overlord, Abyss, Phantom Ray, Phoenix, Void Eye</strong>.</p>
+                </div>
+            `;
+        }
+        // Scenario 2: Friendly has air units, but enemy has no air defense (regardless of enemy having their own air or not)
+        else if (friendlyHasAirUnits && !enemyHasAirDefense) {
+            airVulnerabilityDisplay.innerHTML = `
+                <div class="bg-green-200 text-green-800 p-3 rounded-md shadow-inner mb-4">
+                    <h4 class="font-semibold text-green-900 mb-2">✅ Advantage: Your air units are uncountered by enemy ground forces!</h4>
+                    <p>You have air units deployed, and the enemy's selected ground units do not appear to have air defense. Your air units could be very effective!</p>
+                </div>
+            `;
+        }
+        // If neither of the above, no specific air warning/advantage message is needed.
+    }
+
+
+    // Function to update all calculations
+    function updateAllCalculations() {
+        calculateMinimumCounters();
+        calculateDeploymentSuggestions();
+        calculateUncounteredDeployedUnits();
+        checkAirVulnerabilityAndSuggest(); // New call
+    }
+
+    function handleQuantityChange(unitName, action, type) {
+        let targetMap = (type === 'enemy') ? selectedEnemyUnitQuantities : deployedFriendlyUnitQuantities;
+        let currentQuantity = targetMap.get(unitName) || 0;
+
+        if (action === 'increase') {
+            currentQuantity++;
+        } else if (action === 'decrease') {
+            currentQuantity = Math.max(0, currentQuantity - 1); // Don't go below 0
+        }
+
+        if (currentQuantity > 0) {
+            targetMap.set(unitName, currentQuantity);
+            // Ensure checkbox is checked if quantity is > 0
+            const checkboxId = `${type}-select-${unitName.toLowerCase().replace(/\s/g, '-')}`;
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+            }
+        } else {
+            targetMap.delete(unitName);
+            // Ensure checkbox is unchecked if quantity is 0
+            const checkboxId = `${type}-select-${unitName.toLowerCase().replace(/\s/g, '-')}`;
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox && checkbox.checked) {
+                checkbox.checked = false;
+            }
+        }
+
+        // Update the displayed quantity
+        const quantityDisplaySpan = document.querySelector(`.quantity-display[data-unit="${unitName}"][data-type="${type}"]`);
+        if (quantityDisplaySpan) {
+            quantityDisplaySpan.textContent = currentQuantity;
+        }
+        updateAllCalculations();
+    }
+
+    function renderUnits(category) {
+        const unitCardsDisplay = document.getElementById('unit-cards-display');
+        const enemySelectUnitsDiv = document.getElementById('enemy-select-units');
+        const deployedSelectUnitsDiv = document.getElementById('deployed-select-units');
+
+        unitCardsDisplay.innerHTML = '';
+        enemySelectUnitsDiv.innerHTML = '';
+        deployedSelectUnitsDiv.innerHTML = '';
+
+        let filteredUnits = category === 'all' ? unitsData : unitsData.filter(unit => unit.categories.includes(category));
+        filteredUnits.sort((a, b) => a.name.localeCompare(b.name));
+
+        filteredUnits.forEach(unit => {
+            const unitId = unit.name.toLowerCase().replace(/\s/g, '-');
+
+            // Create main unit card
+            const unitCard = document.createElement('div');
+            unitCard.id = `${unitId}-card`;
+            unitCard.className = 'bg-white rounded-lg shadow-lg p-6 cursor-pointer transform transition duration-300 ease-in-out hover:scale-105 unit-card-header';
+            unitCard.innerHTML = `
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">${unit.name}</h3>
+                <p class="text-sm text-gray-500 mb-2 capitalize">
+                    Categories: ${unit.categories.join(', ')}
+                </p>
+                <p class="text-sm text-gray-500 mb-4">
+                    Cost: ${unit.cost} | Tier: ${unit.tier} | Mirror: ${unit.mirrorMatchRating}
+                </p>
+                <div class="counters mt-4 hidden">
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Good Counters:</h4>
+                    <ul class="list-disc list-inside text-gray-700">
+                        ${unit.counters.sort((a, b) => {
+                            // Sort by best overall rating across all quantity bands for display
+                            const bestRatingA = Math.max(...a.matchups.map(m => getRatingValue(m.rating)));
+                            const bestRatingB = Math.max(...b.matchups.map(m => getRatingValue(m.rating)));
+                            return bestRatingB - bestRatingA;
+                        }).map(counter => formatCounterDisplayForCard(counter)).join('')}
+                    </ul>
+                </div>
+            `;
+            unitCard.addEventListener('click', () => {
+                const countersDiv = unitCard.querySelector('.counters');
+                countersDiv.classList.toggle('hidden');
+            });
+            unitCardsDisplay.appendChild(unitCard);
+
+            // Create checkbox and quantity for "Select Enemy Units"
+            const enemyCheckboxContainer = document.createElement('div');
+            enemyCheckboxContainer.className = 'flex items-center justify-between py-0.5';
+            enemyCheckboxContainer.innerHTML = `
+                <div class="flex items-center">
+                    <input type="checkbox" id="enemy-select-${unitId}" name="selectedEnemyUnits" value="${unit.name}" class="mr-2">
+                    <label for="enemy-select-${unitId}" class="text-gray-700 text-sm cursor-pointer hover:text-gray-900">${unit.name}</label>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button class="quantity-btn text-gray-600 hover:text-gray-900 font-bold px-1 rounded" data-unit="${unit.name}" data-action="decrease" data-type="enemy">-</button>
+                    <span class="quantity-display text-sm font-semibold w-6 text-center" data-unit="${unit.name}" data-type="enemy">0</span>
+                    <button class="quantity-btn text-gray-600 hover:text-gray-900 font-bold px-1 rounded" data-unit="${unit.name}" data-action="increase" data-type="enemy">+</button>
+                </div>
+            `;
+            const enemyCheckboxInput = enemyCheckboxContainer.querySelector('input[type="checkbox"]');
+            const enemyQuantityDisplay = enemyCheckboxContainer.querySelector('.quantity-display');
+
+            // Set initial state from map
+            const initialEnemyQuantity = selectedEnemyUnitQuantities.get(unit.name) || 0;
+            enemyQuantityDisplay.textContent = initialEnemyQuantity;
+            enemyCheckboxInput.checked = initialEnemyQuantity > 0;
+
+            enemyCheckboxInput.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    if (!selectedEnemyUnitQuantities.has(unit.name)) { // If not already in map, add with default 1
+                        selectedEnemyUnitQuantities.set(unit.name, 1);
+                        enemyQuantityDisplay.textContent = 1;
+                    }
+                } else {
+                    selectedEnemyUnitQuantities.delete(unit.name);
+                    enemyQuantityDisplay.textContent = 0;
+                }
+                updateAllCalculations();
+            });
+            enemySelectUnitsDiv.appendChild(enemyCheckboxContainer);
+
+            // Add event listeners for quantity buttons
+            enemyCheckboxContainer.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const unitName = event.target.dataset.unit;
+                    const action = event.target.dataset.action;
+                    const type = event.target.dataset.type;
+                    handleQuantityChange(unitName, action, type);
+                });
+            });
+
+
+            // Create checkbox and quantity for "Select My Deployed Units"
+            const deployedCheckboxContainer = document.createElement('div');
+            deployedCheckboxContainer.className = 'flex items-center justify-between py-0.5';
+            deployedCheckboxContainer.innerHTML = `
+                <div class="flex items-center">
+                    <input type="checkbox" id="deployed-select-${unitId}" name="deployedFriendlyUnits" value="${unit.name}" class="mr-2">
+                    <label for="deployed-select-${unitId}" class="text-gray-700 text-sm cursor-pointer hover:text-gray-900">${unit.name}</label>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button class="quantity-btn text-gray-600 hover:text-gray-900 font-bold px-1 rounded" data-unit="${unit.name}" data-action="decrease" data-type="deployed">-</button>
+                    <span class="quantity-display text-sm font-semibold w-6 text-center" data-unit="${unit.name}" data-type="deployed">0</span>
+                    <button class="quantity-btn text-gray-600 hover:text-gray-900 font-bold px-1 rounded" data-unit="${unit.name}" data-action="increase" data-type="deployed">+</button>
+                </div>
+            `;
+            const deployedCheckboxInput = deployedCheckboxContainer.querySelector('input[type="checkbox"]');
+            const deployedQuantityDisplay = deployedCheckboxContainer.querySelector('.quantity-display');
+
+            // Set initial state from map
+            const initialDeployedQuantity = deployedFriendlyUnitQuantities.get(unit.name) || 0;
+            deployedQuantityDisplay.textContent = initialDeployedQuantity;
+            deployedCheckboxInput.checked = initialDeployedQuantity > 0;
+
+            deployedCheckboxInput.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    if (!deployedFriendlyUnitQuantities.has(unit.name)) { // If not already in map, add with default 1
+                        deployedFriendlyUnitQuantities.set(unit.name, 1);
+                        deployedQuantityDisplay.textContent = 1;
+                    }
+                } else {
+                    deployedFriendlyUnitQuantities.delete(unit.name);
+                    deployedQuantityDisplay.textContent = 0;
+                }
+                updateAllCalculations();
+            });
+            deployedSelectUnitsDiv.appendChild(deployedCheckboxContainer);
+
+            // Add event listeners for quantity buttons
+            deployedCheckboxContainer.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const unitName = event.target.dataset.unit;
+                    const action = event.target.dataset.action;
+                    const type = event.target.dataset.type;
+                    handleQuantityChange(unitName, action, type);
+                });
+            });
+        });
+        updateAllCalculations(); // Initial calculation after rendering filtered units
+    }
+
+    // Event listener for the global clear button
+    document.addEventListener('DOMContentLoaded', () => {
+        renderUnits('all'); // Initial render of all units
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('bg-gray-700', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                });
+                event.target.classList.remove('bg-gray-200', 'text-gray-800');
+                event.target.classList.add('bg-gray-700', 'text-white');
+                renderUnits(event.target.dataset.category);
+            });
+        });
+        document.querySelector('.tab-button[data-category="all"]').click(); // Activate 'All' by default
+
+        document.getElementById('clear-all-selections-btn').addEventListener('click', () => {
+            selectedEnemyUnitQuantities.clear();
+            deployedFriendlyUnitQuantities.clear();
+            // Re-render units to update checkbox states and then recalculate
+            renderUnits(document.querySelector('.tab-button.bg-gray-700').dataset.category);
+        });
+
+        // New event listener for the toggle unit cards button
+        document.getElementById('toggle-unit-cards-btn').addEventListener('click', () => {
+            const unitCardsDisplay = document.getElementById('unit-cards-display');
+            unitCardsDisplay.classList.toggle('hidden');
+        });
+    });
+</script>
+
+</body>
+</html>
