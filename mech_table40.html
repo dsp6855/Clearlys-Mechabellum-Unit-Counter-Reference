@@ -57,22 +57,22 @@
         .unit-pill {
             display: flex;
             align-items: center;
-            padding: 2px 6px;
-            font-size: 0.8rem;
+            padding: 2px 2px;
+            font-size: 0.6rem;
         }
         .unit-pill .flex-grow {
-            padding-left: 4px;
+            padding-left: 2px;
         }
 
         /* NEW: Styles for compact counters */
         .compact-counter-pill {
             display: inline-flex;
             align-items: center;
-            padding: 2px 8px;
-            font-size: 0.8rem;
+            padding: 2px 4px;
+            font-size: 0.4rem;
             border-radius: 9999px; /* Tailwind's rounded-full */
-            margin-right: 4px;
-            margin-bottom: 4px;
+            margin-right: 2px;
+            margin-bottom: 2px;
         }
     </style>
 </head>
@@ -81,7 +81,7 @@
     <!-- Main Title at the top -->
     <div class="relative text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-extrabold text-center text-blue-400">Clearly's Mechabellum Unit Counter Tool</h1>
-        <span class="absolute top-0 right-0 text-xs text-gray-500 font-mono">v3.8</span>
+        <span class="absolute top-0 right-0 text-xs text-gray-500 font-mono">v4.0</span>
     </div>
 
     <div class="flex flex-col md:flex-row gap-8 flex-grow">
@@ -94,16 +94,16 @@
         </div>
 
         <!-- Main Content (Unit Cards and Counters) -->
-        <div class="flex-grow w-full md:w-2/4">
+        <div class="flex-grow w-full md:w-2/4 h-full">
             <!-- Header for control buttons -->
-            <div class="mb-6 flex flex-wrap gap-2 items-center justify-between">
+            <div class="mb-2 flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex-1 min-w-[200px] flex gap-2">
-                    <button id="clear-all-selections-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Clear All Selections</button>
-                    <button id="toggle-unit-cards-btn" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">Show Unit Cards</button>
+                    <button id="clear-all-selections-btn" class="px-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Clear All Selections</button>
+                    <button id="toggle-unit-cards-btn" class="px-1 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">Show Unit Cards</button>
                 </div>
                 <!-- Category Tabs -->
-                <div id="category-tabs" class="flex flex-wrap gap-2 justify-end mt-4 md:mt-0">
-                    <button class="tab-button px-4 py-2 rounded-lg transition-colors bg-gray-700 hover:bg-gray-800 text-white" data-category="all">All</button>
+                <div id="category-tabs" class="flex flex-wrap gap-2 justify-end mt-1 md:mt-0">
+                    <button class="tab-button px-1 py-2 rounded-lg transition-colors bg-gray-700 hover:bg-gray-800 text-white" data-category="all">All</button>
                     <!-- Tabs will be rendered here -->
                 </div>
             </div>
@@ -114,7 +114,7 @@
             </div>
             
             <!-- New section for counter display -->
-            <div id="counters-display" class="mb-8">
+            <div id="counters-display" class="mb-4">
                 <h2 class="text-xl md:text-2xl font-bold mb-4">Counters</h2>
                 <div id="counter-list" class="space-y-4">
                     <!-- Counter information will be populated here -->
@@ -122,17 +122,17 @@
             </div>
 
             <!-- New section for Optimal Counter Suggestions -->
-            <div id="suggestion-display" class="mb-8">
-                <h2 class="text-xl md:text-2xl font-bold mb-4">Optimal Counter Suggestions</h2>
-                <div id="counter-suggestions-list" class="space-y-4">
+            <div id="suggestion-display" class="mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-2">Optimal Counter Suggestions</h2>
+                <div id="counter-suggestions-list" class="space-y-2">
                     <p class="text-gray-400">Select enemy units to get suggestions.</p>
                 </div>
             </div>
 
             <!-- New section for uncountered friendly units -->
-            <div id="uncountered-display" class="mb-8">
-                <h2 class="text-xl md:text-2xl font-bold mb-4">Your Uncountered Units</h2>
-                <div id="uncountered-list" class="space-y-4">
+            <div id="uncountered-display" class="mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-2">Your Uncountered Units</h2>
+                <div id="uncountered-list" class="space-y-2">
                     <p class="text-gray-400">Select friendly units to see which are uncountered.</p>
                 </div>
             </div>
@@ -159,77 +159,95 @@
     </footer>
 
 <script>
+
     document.addEventListener('DOMContentLoaded', () => {
 
-        // Corrected Unit Data based on user feedback
         const mechData = {
             "Abyss": { "category": ["titan", "air", "ranged", "splash"], "descriptions": "Titan, air, late game, single unit, 100 range, splash, targets air and ground, upkeep cost", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
             "Arclight": { "category": ["medium", "ground", "ranged", "splash"], "descriptions": "Medium, ground, anti-swarm, can do anti-air, single unit, splash, 93 range", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Crawler": { "category": ["light", "ground", "melee"], "descriptions": "light, melee, ground, attacks ground only, 24 units, high speed", "unitCount": 24, "isAirUnit": false, "targets": ["ground"] },
-            "Fang": { "category": ["light", "ground", "ranged"], "descriptions": "light, ground, all-purpose, 18 units, 75 range, targets air and ground, can hide, high speed", "unitCount": 18, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Crawler": { "category": ["light", "ground", "melee"], "descriptions": "light, melee, ground, attacks ground only, 24 units, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Fang": { "category": ["light", "ground", "ranged"], "descriptions": "light, ground, all-purpose, 18 units, 75 range, targets air and ground, can hide, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
             "Farseer": { "category": ["large", "ground", "ranged", "splash"], "descriptions": "large, high speed, splash, 125 range, attack air and ground, single unit, rocket", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
-            "Fire Badger": { "category": ["medium", "ground", "ranged", "splash"], "descriptions": "medium, anti-swarm tank, splash, 60 range, targets ground only, 3 units", "unitCount": 3, "isAirUnit": false, "targets": ["ground"] },
+            "Fire Badger": { "category": ["medium", "ground", "ranged", "splash"], "descriptions": "medium, anti-swarm tank, splash, 60 range, targets ground only, 3 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Fortress": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, high damage, rocket, ground only target, 100 range, splash, slow, high hp, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Hacker": { "category": ["medium", "ground", "special", "ranged"], "descriptions": "hacker, ground, disables tech, 110 range, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Hounds": { "category": ["light", "ground", "ranged", "splash"], "descriptions": "high-speed, anti-unit, ground only, 70 range, 5 units", "unitCount": 5, "isAirUnit": false, "targets": ["ground"] },
+            "Hounds": { "category": ["light", "ground", "ranged", "splash"], "descriptions": "high-speed, anti-unit, ground only, 70 range, 5 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Marksman": { "category": ["light", "ground", "ranged"], "descriptions": "light, anti-air, targets air and ground, 140 range, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
             "Melting Point": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "heavy, ground, anti-armor, flame, 115 range, large splash, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
             "Mountain": { "category": ["titan", "ground", "ranged", "splash"], "descriptions": "giant, high hp, slow, ranged, 100 range, target ground only, 1 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Mustang": { "category": ["light", "ground", "ranged"], "descriptions": "light, mobile, anti-air, targets air and ground, 95 range, 12 units", "unitCount": 12, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Mustang": { "category": ["light", "ground", "ranged"], "descriptions": "light, mobile, anti-air, targets air and ground, 95 range, 12 units", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
             "Overlord": { "category": ["giant", "air", "ranged", "splash"], "descriptions": "giant, anti-swarm, fire, 120 range, splash, single unit, high hp, fast", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
-            "Phantom Ray": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "light, air, 65 range, high speed, single unit, splash, targets air and ground, low hp", "unitCount": 3, "isAirUnit": true, "targets": ["air", "ground"] },
-            "Phoenix": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "medium, air, 120 range, targets air and ground, 2 units, splash, high speed", "unitCount": 2, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Phantom Ray": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "light, air, 65 range, high speed, single unit, splash, targets air and ground, low hp", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Phoenix": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "medium, air, 120 range, targets air and ground, 2 units, splash, high speed", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
             "Raiden": { "category": ["giant", "air", "ranged"], "descriptions": "heavy, ground, 110 range, single unit, targets air and ground, rocket", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
             "Rhino": { "category": ["heavy", "ground", "melee", "splash"], "descriptions": "heavy, high hp, ground, anti-armor, single unit, splash", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Sabertooth": { "category": ["heavy", "ground", "ranged"], "descriptions": "heavy, 90 range, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Sandworm": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, ground, splash, single unit, burrow. Can attack air with tech upgrade.", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Scorpion": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, anti-swarm, big splsh, high damage, slow speed, target ground only, single unit, 100 range", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Sledgehammer": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "Heavy Tank, ranged, ground target, splash, slow, 95 range, 5 units", "unitCount": 5, "isAirUnit": false, "targets": ["ground"] },
-            "Steel Ball": { "category": ["medium", "ground", "ranged"], "descriptions": "high-speed, anti-unit, ground only 45 range, attack grows longer attacking, 4 units", "unitCount": 4, "isAirUnit": false, "targets": ["ground"] },
-            "Stormcaller": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy rocket launcher, target ground only, splash, 180 range, 4 units, rockets", "unitCount": 4, "isAirUnit": false, "targets": ["ground"] },
+            "Sledgehammer": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "Heavy Tank, ranged, ground target, splash, slow, 95 range, 5 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Steel Ball": { "category": ["medium", "ground", "ranged"], "descriptions": "high-speed, anti-unit, ground only 45 range, attack grows longer attacking, 4 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Stormcaller": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy rocket launcher, target ground only, splash, 180 range, 4 units, rockets", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Tarantula": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, splash, 80 range, fast attack, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Typhoon": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, all purpose, splash, quick attack, 100 range, targets air and ground, 2 units", "unitCount": 2, "isAirUnit": false, "targets": ["air", "ground"] },
-            "Void Eye": { "category": ["light", "ground", "special", "ranged"], "descriptions": "light, high damage, 100 range, target ground only, 3 units. Can attack air with tech upgrade.", "unitCount": 3, "isAirUnit": false, "targets": ["ground"] },
+            "Typhoon": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, all purpose, splash, quick attack, 100 range, targets air and ground, 2 units", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Void Eye": { "category": ["light", "ground", "special", "ranged"], "descriptions": "light, high damage, 100 range, target ground only, 3 units. Can attack air with tech upgrade.", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "Vulcan": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, anti-swarm, fire, large spash, 95 range,target ground only, single unit, high hp", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
             "War Factory": { "category": ["titan", "ground", "ranged", "splash"], "descriptions": "titan, produces other units, high hp, expensive, 100 range, targets ground only, splash, slow, upkeep cost", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
-            "Wasp": { "category": ["light", "air", "ranged"], "descriptions": "light, air, 12 units, 50 range, high speed, targets air and ground, low HP", "unitCount": 12, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Wasp": { "category": ["light", "air", "ranged"], "descriptions": "light, air, 12 units, 50 range, high speed, targets air and ground, low HP", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
             "Wrath": { "category": ["heavy", "air", "ranged", "splash"], "descriptions": "heavy, air, single unit, 60 range, splash", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] }
         };
 
         const countersData = {
-            "Abyss": { "weakness": ["Marksman", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Typhoon", "Farseer", "Raiden", "Wrath"], "resistance": [] },
-            "Arclight": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball"] },
-            "Crawler": { "weakness": ["Fire Badger", "Vulcan", "Overlord", "Arclight", "Melting Point", "Scorpion", "Sledgehammer", "Steel Ball", "Rhino"], "resistance": ["Fang", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden", "Wrath"] },
-            "Fang": { "weakness": ["Marksman", "Sledgehammer", "Rhino", "Scorpion", "Stormcaller"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Farseer": { "weakness": ["Marksman", "Mustang", "Wasp", "Typhoon", "Phoenix", "Phantom Ray", "Raiden", "Wrath"], "resistance": [] },
-            "Fire Badger": { "weakness": ["Crawler", "Hacker", "Marksman", "Sabertooth", "Steel Ball", "Void Eye"], "resistance": ["Arclight", "Fire Badger", "Mustang", "Sandworm", "Scorpion", "Sledgehammer", "Stormcaller", "Tarantula", "Typhoon", "Vulcan", "War Factory"] },
-            "Fortress": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point", "War Factory", "Tarantula", "Typhoon"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye", "Fang", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden", "Wrath"] },
-            "Hacker": { "weakness": ["Steel Ball", "Sledgehammer", "Rhino", "Scorpion", "Melting Point"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Void Eye"] },
+            "Abyss": { "weakness": ["Marksman", "Mustang", "Wasp", "Melting Point"], "resistance": [] },
+            "Arclight": { "weakness": ["Stormcaller", "Steel Ball","Rhino", "Scorpion", "Vulcan", "Overlord", "Melting Point", "Fortress", "War Factory"], "resistance": ["Crawler", "Hounds", "Steel Ball", "Fang", "Mustang"] },
+            "Crawler": { "weakness": ["Arclight","Fire Badger", "Vulcan", "Arclight", "Sledgehammer", "Rhino", "Wrath"], "resistance": ["Fang", "Marksman", "Sabertooth", "Steel Ball", "Melting Point", "Hacker"] },
+            "Fang": { "weakness": ["Fire Badger", "Typhoon", "Mustang", "Steel Ball", "Wraith", "Rhino","Vulcan"], "resistance": ["Marksman", "Wasp", "Phoenix", "Overlord"] },
+            "Farseer": { "weakness": ["Rhino", "Melting Point", "Fortress", "War Factory"], "resistance": ["Marksman", "Hacker", "Phoenix", "Wrath"] },
+            "Fire Badger": { "weakness": ["Rhino", "Fortress", "War Factory", "Sabertooth", "Overlord"], "resistance": ["Crawler", "Fang", "Arclight", "Mustang"] },
+            "Fortress": { "weakness": ["Fang", "Steel Ball", "Overlord", "Melting Point"], "resistance": ["Sledgehammer", "Tarantula", "Vulcan", "Fire Badger", "Typhoon"] },
+            "Hacker": { "weakness": ["Fang", "Stormcaller", "War Factory", "Phoenix", "Crawler", "Overlord"], "resistance": ["Fire Badger", "Arclight", "Scorpion", "Sledgehammer", "Steel Ball"] },
             "Hounds": { "weakness": ["Fire Badger", "Vulcan", "Overlord", "Arclight", "Melting Point", "Scorpion", "Sledgehammer", "Steel Ball", "Rhino"], "resistance": ["Fang", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden", "Wrath", "Hacker"] },
-            "Marksman": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Fang"] },
-            "Melting Point": { "weakness": ["Marksman", "Mountain", "Sledgehammer", "Rhino", "Sandworm", "Stormcaller", "Void Eye"], "resistance": ["Crawler", "Hounds", "Sabertooth"] },
+            "Marksman": { "weakness": ["Crawler", "Fang", "Mustang", "War Factory", "Farseer"], "resistance": ["Arclight", "Hacker","Overlord", "Phoenix", "Wraith"] },
+            "Melting Point": { "weakness": ["Crawler", "Marksman", "Phoenix","Steel Ball"], "resistance": ["Scorpion", "Fortress", "Rhino", "Vulcan", "Typhoon"] },
             "Mountain": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point", "Sandworm", "Stormcaller", "Tarantula"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Mustang": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point", "Sandworm", "Stormcaller", "Tarantula"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball"] },
-            "Overlord": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Melting Point", "Mountain", "Sandworm", "Stormcaller"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
+            "Mustang": { "weakness": ["Fang","Rhino", "Wasp","Phoenix","Overlord","Farseer", "Tarantula"], "resistance": ["Vulcan", "Sledgehammer", "War Hammer", "Typhoon", "Fire Badger"] },
+            "Overlord": { "weakness": ["Melting Point", "Phoenix", "Wasp", "Mustang"], "resistance": ["Rhino", "Steel Ball", "Sledgehammer", "Stormcaller", "Vulcan", "Arclight", "Hacker", "Scorpion", "Fire Badger", "Sabertooth", "Typhoon"] },
             "Phantom Ray": { "weakness": ["Marksman", "Mustang", "Wasp", "Typhoon", "Phoenix", "Farseer", "Raiden", "Wrath"], "resistance": ["Arclight", "Fire Badger", "Fortress", "Melting Point", "Rhino", "Sabertooth", "Sandworm", "Scorpion", "Sledgehammer", "Steel Ball", "Stormcaller", "Tarantula", "Typhoon", "Vulcan", "War Factory"] },
-            "Phoenix": { "weakness": ["Marksman", "Mustang", "Wasp", "Typhoon", "Farseer", "Raiden", "Wrath", "Phantom Ray"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Raiden": { "weakness": ["Sledgehammer", "Rhino", "Scorpion", "Vulcan", "Overlord", "Melting Point"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Rhino": { "weakness": ["Steel Ball", "Sledgehammer", "Scorpion", "Stormcaller", "Tarantula", "Vulcan"], "resistance": ["Crawler", "Hacker", "Hounds", "Melting Point", "Sabertooth", "Void Eye"] },
-            "Sabertooth": { "weakness": ["Fire Badger", "Vulcan", "Overlord", "Arclight", "Melting Point", "Scorpion", "Sledgehammer", "Steel Ball", "Rhino"], "resistance": ["Fang", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden", "Wrath"] },
+            "Phoenix": { "weakness": ["Mustang", "Fang", "Wasp", "Marksman", "Farseer"], "resistance": ["Overlord", "richness", "Stormcaller", "Vulcan", "Typhoon", "Sabertooth", "Fire Badger"] },
+            "Raiden": { "weakness": ["Farseer", "Marksman", "Melting Point", "Overlord", "Phoenix"], "resistance": ["Fire Badger", "Sledgehammer", "Steel Ball", "Stormcaller"] },
+            "Rhino": { "weakness": ["Steel Ball", "War Factory", "Phoenix", "Melting Point", "Hacker", "Overlord"], "resistance": ["Fire Badger", "Crawler", "Mustang", "Vulcan", "Stormcaller", "Marksman"] },
+            "Sabertooth": { "weakness": ["Crawler", "Fang", "Steel Ball", "Melting Point", "Fortress", "War Factory"], "resistance": ["Sledgehammer", "Tarantula", "Hacker", "Vulcan", "Typhoon", "Fire Badger", "Farseer"] },
             "Sandworm": { "weakness": ["Sledgehammer", "Stormcaller", "Tarantula", "Rhino"], "resistance": ["Crawler", "Hacker", "Hounds", "Marksman", "Melting Point", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Scorpion": { "weakness": ["Sledgehammer", "Rhino", "Stormcaller", "Tarantula"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Sledgehammer": { "weakness": ["Steel Ball", "Rhino", "Sandworm", "Stormcaller"], "resistance": ["Crawler", "Hacker", "Hounds", "Marksman", "Melting Point", "Sabertooth", "Void Eye"] },
-            "Steel Ball": { "weakness": ["Sledgehammer", "Scorpion", "Stormcaller", "Tarantula", "Rhino"], "resistance": ["Crawler", "Hacker", "Hounds", "Marksman", "Melting Point", "Sabertooth", "Void Eye"] },
-            "Stormcaller": { "weakness": ["Steel Ball", "Rhino", "Sledgehammer", "Scorpion", "Tarantula", "Vulcan"], "resistance": ["Crawler", "Hacker", "Hounds", "Sabertooth", "Void Eye"] },
-            "Tarantula": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Stormcaller"], "resistance": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Typhoon": { "weakness": ["Marksman", "Mustang", "Wasp", "Farseer", "Raiden", "Wrath"], "resistance": ["Crawler", "Hacker", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
+            "Scorpion": { "weakness": ["Wasp", "Overlord", "Phoenix"], "resistance": ["Sledgehammer", "Tarantula", "Hacker", "Vulcan", "Fire Badger", "Typhoon", "War Factory"] },
+            "Sledgehammer": { "weakness": ["Phoenix", "Vulcan", "War Hammer"], "resistance": ["Crawler", "Mustang", "Arclight"] },
+            "Steel Ball": { "weakness": ["Crawler", "Phoenix", "Overlord"], "resistance": ["Sledgehammer", "Tarantula", "Rhino", "Sandworm"] },
+            "Stormcaller": { "weakness": ["Marksman", "Arclight", "Mustang", "Vulcan", "Fortress", "Typhoon", "Fang", "Overlord"], "resistance": ["Rhino", "Sledgehammer", "War Factory"] },
+            "Tarantula": { "weakness": ["Steel Ball", "War Factory", "Stormcaller", "Fortress", "Marksman", "Melting Point", "Overlord", "Phoenix"], "resistance": ["Arclight", "Mustang", "Hacker"] },
+            "Typhoon": { "weakness": ["War Factory", "Steel Ball", "Scorpion", "Melting Point", "Phoenix", "Sabertooth"], "resistance": ["Mustang", "Wasp", "Crawler", "Fang", "Hounds"] },
             "Void Eye": { "weakness": ["Crawler", "Melting Point", "Rhino", "Scorpion", "Sledgehammer", "Steel Ball", "Tarantula", "Typhoon", "Vulcan"], "resistance": ["Hacker", "Hounds", "Marksman", "Sabertooth", "Stormcaller"] },
-            "Vulcan": { "weakness": ["Rhino", "Sledgehammer", "Scorpion", "Stormcaller", "Tarantula"], "resistance": ["Crawler", "Hacker", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "War Factory": { "weakness": ["Melting Point", "Rhino", "Sledgehammer", "Scorpion", "Tarantula", "Typhoon", "Vulcan"], "resistance": ["Crawler", "Hacker", "Hounds", "Marksman", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Wasp": { "weakness": ["Marksman", "Mustang", "Phoenix", "Farseer", "Raiden", "Wrath"], "resistance": ["Crawler", "Hacker", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
-            "Wrath": { "weakness": ["Marksman", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden"], "resistance": ["Arclight", "Fortress", "Melting Point", "Rhino", "Sabertooth", "Sandworm", "Scorpion", "Sledgehammer", "Steel Ball", "Stormcaller", "Tarantula", "Typhoon", "Vulcan", "War Factory", "Void Eye"] }
+            "Vulcan": { "weakness": ["Fortress", "Melting Point", "Overlord", "Phoenix", "Steel Ball"], "resistance": ["Crawler", "Arclight", "Marksman", "Mustang", "Sledgehammer"] },
+            "War Factory": { "weakness": ["Melting Point", "Scorpion", "Overlord"], "resistance": ["Arclight", "Stormcaller", "Sledgehammer", "Steel Ball", "Rhino", "Sabertooth", "Vulcan", "Typhoon"] },
+            "Wasp": { "weakness": ["Mustang", "Fang", "Wrath"], "resistance": ["Marksman", "Phoenix", "Melting Point", "Overlord"] },
+            "Wrath": { "weakness": ["Melting Point", "Overlord", "Phoenix", "Marksman"], "resistance": ["Crawler", "Fang", "Sledgehammer", "Steel Ball", "Wasp"] }
         };
-
+		
+		const orderedCategories = [
+			'All',
+			'Light',
+			'Medium',
+			'Large',
+			'Heavy',
+			'Giant',
+			'Titan',
+			'Ground',
+			'Air',
+			'Attacks Air',
+			'Melee',
+			'Ranged',
+			'Special',
+			'Splash'
+		];
+				
+		
         // NEW: This loop adds each unit to its own weakness array, as requested.
         for (const unit in countersData) {
             if (countersData.hasOwnProperty(unit)) {
@@ -338,27 +356,18 @@
             Object.values(mechData).forEach(unit => {
                 unit.category.forEach(cat => categories.add(cat));
             });
-            const sortedCategories = Array.from(categories).sort();
+   const tabsContainer = document.getElementById('category-tabs');
+    tabsContainer.innerHTML = ''; // Clear all existing buttons
 
-            const tabsContainer = document.getElementById('category-tabs');
-            tabsContainer.innerHTML = '<button class="tab-button px-4 py-2 rounded-lg transition-colors bg-gray-700 hover:bg-gray-800 text-white" data-category="all">All</button>';
-            
-            // Add the new "Attacks Air" filter button
-            const attacksAirButton = document.createElement('button');
-            attacksAirButton.className = 'tab-button px-4 py-2 rounded-lg transition-colors bg-gray-800 hover:bg-gray-700 text-white';
-            attacksAirButton.dataset.category = 'attacks-air';
-            attacksAirButton.textContent = 'Attacks Air';
-            tabsContainer.appendChild(attacksAirButton);
-
-            sortedCategories.forEach(category => {
-                const button = document.createElement('button');
-                button.className = 'tab-button px-4 py-2 rounded-lg transition-colors bg-gray-800 hover:bg-gray-700 text-white';
-                button.dataset.category = category;
-                button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-                tabsContainer.appendChild(button);
-            });
-        };
-
+    orderedCategories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'tab-button text-sm font-semibold py-1 px-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition duration-300';
+        button.dataset.category = category.toLowerCase().replace(/\s/g, '-');
+        button.textContent = category;
+        tabsContainer.appendChild(button);
+    });
+};
+ 
         const renderUnitCards = (filterCategory = 'all') => {
             const unitCardsDisplay = document.getElementById('unit-cards-display');
             unitCardsDisplay.innerHTML = '';
@@ -375,7 +384,7 @@
 
                 if (matchesFilter) {
                     const card = document.createElement('div');
-                    card.className = 'bg-gray-800 rounded-lg p-4 shadow-lg';
+                    card.className = 'bg-gray-800 rounded-lg p-1 shadow-lg';
                     card.innerHTML = `
                         <h3 class="text-xl font-bold mb-2 unit-card-header" id="card-${unitName}">${unitName}</h3>
                         <p class="text-sm text-gray-400 mb-2">Category: ${data.category.join(', ')}</p>
@@ -440,7 +449,7 @@
                 const totalFriendlyUnits = Array.from(deployedFriendlyUnitQuantities.values()).reduce((sum, q) => sum + q, 0);
 
                 const counterContainer = document.createElement('div');
-                counterContainer.className = 'bg-gray-800 p-4 rounded-lg shadow-inner';
+                counterContainer.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
 
                 const header = document.createElement('div');
                 header.className = 'flex items-center justify-between mb-2';
@@ -559,7 +568,7 @@
                 suggestionsList.innerHTML = '';
                 sortedSuggestions.forEach(([unit, data]) => {
                     const item = document.createElement('div');
-                    item.className = 'bg-gray-800 p-4 rounded-lg shadow-inner';
+                    item.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
                     item.innerHTML = `
                         <h4 class="text-lg font-bold text-green-400">${unit}</h4>
                         <p class="text-sm text-gray-300">Effective vs:
@@ -613,7 +622,7 @@
                 uncounteredList.innerHTML = '';
                 uncounteredUnits.forEach(item => {
                     const unitDiv = document.createElement('div');
-                    unitDiv.className = 'bg-gray-800 p-4 rounded-lg shadow-inner';
+                    unitDiv.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
                     unitDiv.innerHTML = `
                         <h4 class="text-lg font-bold text-blue-400 mb-1">${item.unit} x${item.quantity}</h4>
                         <p class="text-sm text-gray-300">This unit has no direct counter among the enemy forces.</p>
