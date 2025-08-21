@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clearly's Mechabellum Unit Counter Tool</title>
+    <!-- Load Tailwind CSS from CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e; /* Dark theme background */
+            color: #e0e0e0;
+        }
+        /* Custom scrollbar for sidebars */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #2e2e4e;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: #5c5c8a;
+            border-radius: 4px;
+        }
+        /* Sticky sidebar containers */
+        .sticky-sidebar {
+            position: sticky;
+            top: 1rem;
+            align-self: flex-start;
+        }
+        .quantity-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #4a4a6e;
+            background-color: #3e3e5e;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        .quantity-btn:hover {
+            background-color: #5c5c8a;
+        }
+        .quantity-display {
+            min-width: 24px;
+            text-align: center;
+        }
+        .unit-card-header {
+            scroll-margin-top: 80px;
+        }
+        /* Custom styles for the unit pill */
+        .unit-pill {
+            display: flex;
+            align-items: center;
+            padding: 2px 2px;
+            font-size: 0.6rem;
+        }
+        .unit-pill .flex-grow {
+            padding-left: 2px;
+        }
+
+        /* NEW: Styles for compact counters */
+        .compact-counter-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 4px;
+            font-size: 0.4rem;
+            border-radius: 9999px; /* Tailwind's rounded-full */
+            margin-right: 2px;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col min-h-screen">
+
+    <!-- Main Title at the top -->
+    <div class="relative text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-blue-400">Clearly's Mechabellum Unit Counter Tool</h1>
+        <span class="absolute top-0 right-0 text-xs text-gray-500 font-mono">v4.1</span>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8 flex-grow">
+        <!-- Enemy Units Sidebar -->
+        <div id="enemy-units-container" class="sticky-sidebar sidebar w-full md:w-1/4 h-screen overflow-y-auto pr-4">
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-center">Enemy Units</h2>
+            <div id="enemy-units-list" class="space-y-1">
+                <!-- Unit list will be populated here -->
+            </div>
+        </div>
+
+        <!-- Main Content (Unit Cards and Counters) -->
+        <div class="flex-grow w-full md:w-2/4 h-full">
+            <!-- Header for control buttons -->
+            <div class="mb-2 flex flex-wrap gap-2 items-center justify-between">
+                <div class="flex-1 min-w-[200px] flex gap-2">
+                    <button id="clear-all-selections-btn" class="px-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Clear All Selections</button>
+                    <button id="toggle-unit-cards-btn" class="px-1 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">Show Unit Cards</button>
+                </div>
+                <!-- Category Tabs -->
+                <div id="category-tabs" class="flex flex-wrap gap-2 justify-end mt-1 md:mt-0">
+                    <button class="tab-button px-1 py-2 rounded-lg transition-colors bg-gray-700 hover:bg-gray-800 text-white" data-category="all">All</button>
+                    <!-- Tabs will be rendered here -->
+                </div>
+            </div>
+
+            <!-- New section for air superiority banner -->
+            <div id="air-superiority-banner" class="bg-blue-600 text-white text-center py-2 px-4 rounded-lg mb-4 hidden">
+                <p class="font-bold"></p>
+            </div>
+            
+            <!-- New section for counter display -->
+            <div id="counters-display" class="mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-4">Counters</h2>
+                <div id="counter-list" class="space-y-4">
+                    <!-- Counter information will be populated here -->
+                </div>
+            </div>
+
+            <!-- New section for Optimal Counter Suggestions -->
+            <div id="suggestion-display" class="mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-2">Optimal Counter Suggestions</h2>
+                <div id="counter-suggestions-list" class="space-y-2">
+                    <p class="text-gray-400">Select enemy units to get suggestions.</p>
+                </div>
+            </div>
+
+            <!-- New section for uncountered friendly units -->
+            <div id="uncountered-display" class="mb-4">
+                <h2 class="text-xl md:text-2xl font-bold mb-2">Your Uncountered Units</h2>
+                <div id="uncountered-list" class="space-y-2">
+                    <p class="text-gray-400">Select friendly units to see which are uncountered.</p>
+                </div>
+            </div>
+
+            <!-- Unit Cards Display, now with the 'hidden' class by default -->
+            <div id="unit-cards-display" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+                <!-- Unit cards will be populated here -->
+            </div>
+        </div>
+
+        <!-- Friendly Units Sidebar -->
+        <div id="friendly-units-container" class="sticky-sidebar w-full md:w-1/4 h-screen overflow-y-auto pl-4">
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-center">Friendly Units</h2>
+            <div id="friendly-units-list" class="space-y-1">
+                <!-- Unit list will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-sm text-gray-500">
+        <p>&copy; 2025 Clearly's Mechabellum Unit Counter Tool. All rights reserved.</p>
+        <p>Code available on <a href="#" class="underline hover:text-gray-300">GitHub</a></p>
+    </footer>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const mechData = {
+            "Abyss": { "category": ["titan", "air", "ranged", "splash"], "descriptions": "Titan, air, late game, single unit, 100 range, splash, targets air and ground, upkeep cost", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Arclight": { "category": ["medium", "ground", "ranged", "splash"], "descriptions": "Medium, ground, anti-swarm, can do anti-air, single unit, splash, 93 range", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Crawler": { "category": ["light", "ground", "melee"], "descriptions": "light, melee, ground, attacks ground only, 24 units, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Fang": { "category": ["light", "ground", "ranged"], "descriptions": "light, ground, all-purpose, 18 units, 75 range, targets air and ground, can hide, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Farseer": { "category": ["large", "ground", "ranged", "splash"], "descriptions": "large, high speed, splash, 125 range, attack air and ground, single unit, rocket", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Fire Badger": { "category": ["medium", "ground", "ranged", "splash"], "descriptions": "medium, anti-swarm tank, splash, 60 range, targets ground only, 3 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Fortress": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, high damage, rocket, ground only target, 100 range, splash, slow, high hp, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Hacker": { "category": ["medium", "ground", "special", "ranged"], "descriptions": "hacker, ground, disables tech, 110 range, high speed", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Hounds": { "category": ["light", "ground", "ranged", "splash"], "descriptions": "high-speed, anti-unit, ground only, 70 range, 5 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Marksman": { "category": ["light", "ground", "ranged"], "descriptions": "light, anti-air, targets air and ground, 140 range, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Melting Point": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "heavy, ground, anti-armor, flame, 115 range, large splash, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Mountain": { "category": ["titan", "ground", "ranged", "splash"], "descriptions": "giant, high hp, slow, ranged, 100 range, target ground only, 1 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Mustang": { "category": ["light", "ground", "ranged"], "descriptions": "light, mobile, anti-air, targets air and ground, 95 range, 12 units", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Overlord": { "category": ["giant", "air", "ranged", "splash"], "descriptions": "giant, anti-swarm, fire, 120 range, splash, single unit, high hp, fast", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Phantom Ray": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "light, air, 65 range, high speed, single unit, splash, targets air and ground, low hp", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Phoenix": { "category": ["medium", "air", "ranged", "splash"], "descriptions": "medium, air, 120 range, targets air and ground, 2 units, splash, high speed", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Raiden": { "category": ["giant", "air", "ranged"], "descriptions": "heavy, ground, 110 range, single unit, targets air and ground, rocket", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Rhino": { "category": ["heavy", "ground", "melee", "splash"], "descriptions": "heavy, high hp, ground, anti-armor, single unit, splash", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Sabertooth": { "category": ["heavy", "ground", "ranged"], "descriptions": "heavy, 90 range, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Sandworm": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, ground, splash, single unit, burrow. Can attack air with tech upgrade.", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Scorpion": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, anti-swarm, big splsh, high damage, slow speed, target ground only, single unit, 100 range", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Sledgehammer": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "Heavy Tank, ranged, ground target, splash, slow, 95 range, 5 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Steel Ball": { "category": ["medium", "ground", "ranged"], "descriptions": "high-speed, anti-unit, ground only 45 range, attack grows longer attacking, 4 units", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Stormcaller": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy rocket launcher, target ground only, splash, 180 range, 4 units, rockets", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Tarantula": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, splash, 80 range, fast attack, single unit", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Typhoon": { "category": ["heavy", "ground", "ranged", "splash"], "descriptions": "heavy, all purpose, splash, quick attack, 100 range, targets air and ground, 2 units", "unitCount": 1, "isAirUnit": false, "targets": ["air", "ground"] },
+            "Void Eye": { "category": ["light", "ground", "special", "ranged"], "descriptions": "light, high damage, 100 range, target ground only, 3 units. Can attack air with tech upgrade.", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Vulcan": { "category": ["giant", "ground", "ranged", "splash"], "descriptions": "giant, anti-swarm, fire, large spash, 95 range,target ground only, single unit, high hp", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "War Factory": { "category": ["titan", "ground", "ranged", "splash"], "descriptions": "titan, produces other units, high hp, expensive, 100 range, targets ground only, splash, slow, upkeep cost", "unitCount": 1, "isAirUnit": false, "targets": ["ground"] },
+            "Wasp": { "category": ["light", "air", "ranged"], "descriptions": "light, air, 12 units, 50 range, high speed, targets air and ground, low HP", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] },
+            "Wrath": { "category": ["heavy", "air", "ranged", "splash"], "descriptions": "heavy, air, single unit, 60 range, splash", "unitCount": 1, "isAirUnit": true, "targets": ["air", "ground"] }
+        };
+
+        const countersData = {
+            "Abyss": { "weak_to": ["Marksman", "Mustang", "Wasp", "Melting Point"], "strong_counter": [] },
+            "Arclight": { "weak_to": ["Stormcaller", "Steel Ball","Rhino", "Scorpion", "Vulcan", "Overlord", "Melting Point", "Fortress", "War Factory"], "strong_counter": ["Crawler", "Hounds", "Steel Ball", "Fang", "Mustang"] },
+            "Crawler": { "weak_to": ["Arclight","Fire Badger", "Vulcan", "Arclight", "Sledgehammer", "Rhino", "Wrath"], "strong_counter": ["Fang", "Marksman", "Sabertooth", "Steel Ball", "Melting Point", "Hacker"] },
+            "Fang": { "weak_to": ["Fire Badger", "Typhoon", "Mustang", "Steel Ball", "Wraith", "Rhino","Vulcan"], "strong_counter": ["Marksman", "Wasp", "Phoenix", "Overlord"] },
+            "Farseer": { "weak_to": ["Rhino", "Melting Point", "Fortress", "War Factory"], "strong_counter": ["Marksman", "Hacker", "Phoenix", "Wrath"] },
+            "Fire Badger": { "weak_to": ["Rhino", "Fortress", "War Factory", "Sabertooth", "Overlord"], "strong_counter": ["Crawler", "Fang", "Arclight", "Mustang"] },
+            "Fortress": { "weak_to": ["Fang", "Steel Ball", "Overlord", "Melting Point"], "strong_counter": ["Sledgehammer", "Tarantula", "Vulcan", "Fire Badger", "Typhoon"] },
+            "Hacker": { "weak_to": ["Fang", "Stormcaller", "War Factory", "Phoenix", "Crawler", "Overlord"], "strong_counter": ["Fire Badger", "Arclight", "Scorpion", "Sledgehammer", "Steel Ball"] },
+            "Hounds": { "weak_to": ["Fire Badger", "Vulcan", "Overlord", "Arclight", "Melting Point", "Scorpion", "Sledgehammer", "Steel Ball", "Rhino"], "strong_counter": ["Fang", "Mustang", "Wasp", "Phantom Ray", "Phoenix", "Farseer", "Raiden", "Wrath", "Hacker"] },
+            "Marksman": { "weak_to": ["Crawler", "Fang", "Mustang", "War Factory", "Farseer"], "strong_counter": ["Arclight", "Hacker","Overlord", "Phoenix", "Wraith"] },
+            "Melting Point": { "weak_to": ["Crawler", "Marksman", "Phoenix","Steel Ball"], "strong_counter": ["Scorpion", "Fortress", "Rhino", "Vulcan", "Typhoon"] },
+            "Mountain": { "weak_to": ["Rhino", "Sledgehammer", "Scorpion", "Vulcan", "Overlord", "Melting Point", "Sandworm", "Stormcaller", "Tarantula"], "strong_counter": ["Crawler", "Hounds", "Sabertooth", "Steel Ball", "Void Eye"] },
+            "Mustang": { "weak_to": ["Fang","Rhino", "Wasp","Phoenix","Overlord","Farseer", "Tarantula"], "strong_counter": ["Vulcan", "Sledgehammer", "War Hammer", "Typhoon", "Fire Badger"] },
+            "Overlord": { "weak_to": ["Melting Point", "Phoenix", "Wasp", "Mustang"], "strong_counter": ["Rhino", "Steel Ball", "Sledgehammer", "Stormcaller", "Vulcan", "Arclight", "Hacker", "Scorpion", "Fire Badger", "Sabertooth", "Typhoon"] },
+            "Phantom Ray": { "weak_to": ["Marksman", "Mustang", "Wasp", "Typhoon", "Phoenix", "Farseer", "Raiden", "Wrath"], "strong_counter": ["Arclight", "Fire Badger", "Fortress", "Melting Point", "Rhino", "Sabertooth", "Sandworm", "Scorpion", "Sledgehammer", "Steel Ball", "Stormcaller", "Tarantula", "Typhoon", "Vulcan", "War Factory"] },
+            "Phoenix": { "weak_to": ["Mustang", "Fang", "Wasp", "Marksman", "Farseer"], "strong_counter": ["Overlord", "richness", "Stormcaller", "Vulcan", "Typhoon", "Sabertooth", "Fire Badger"] },
+            "Raiden": { "weak_to": ["Farseer", "Marksman", "Melting Point", "Overlord", "Phoenix"], "strong_counter": ["Fire Badger", "Sledgehammer", "Steel Ball", "Stormcaller"] },
+            "Rhino": { "weak_to": ["Steel Ball", "War Factory", "Phoenix", "Melting Point", "Hacker", "Overlord"], "strong_counter": ["Fire Badger", "Crawler", "Mustang", "Vulcan", "Stormcaller", "Marksman"] },
+            "Sabertooth": { "weak_to": ["Crawler", "Fang", "Steel Ball", "Melting Point", "Fortress", "War Factory"], "strong_counter": ["Sledgehammer", "Tarantula", "Hacker", "Vulcan", "Typhoon", "Fire Badger", "Farseer"] },
+            "Sandworm": { "weak_to": ["Sledgehammer", "Stormcaller", "Tarantula", "Rhino"], "strong_counter": ["Crawler", "Hacker", "Hounds", "Marksman", "Melting Point", "Sabertooth", "Steel Ball", "Void Eye"] },
+            "Scorpion": { "weak_to": ["Wasp", "Overlord", "Phoenix"], "strong_counter": ["Sledgehammer", "Tarantula", "Hacker", "Vulcan", "Fire Badger", "Typhoon", "War Factory"] },
+            "Sledgehammer": { "weak_to": ["Phoenix", "Vulcan", "War Hammer"], "strong_counter": ["Crawler", "Mustang", "Arclight"] },
+            "Steel Ball": { "weak_to": ["Crawler", "Phoenix", "Overlord"], "strong_counter": ["Sledgehammer", "Tarantula", "Rhino", "Sandworm"] },
+            "Stormcaller": { "weak_to": ["Marksman", "Arclight", "Mustang", "Vulcan", "Fortress", "Typhoon", "Fang", "Overlord"], "strong_counter": ["Rhino", "Sledgehammer", "War Factory"] },
+            "Tarantula": { "weak_to": ["Steel Ball", "War Factory", "Stormcaller", "Fortress", "Marksman", "Melting Point", "Overlord", "Phoenix"], "strong_counter": ["Arclight", "Mustang", "Hacker"] },
+            "Typhoon": { "weak_to": ["War Factory", "Steel Ball", "Scorpion", "Melting Point", "Phoenix", "Sabertooth"], "strong_counter": ["Mustang", "Wasp", "Crawler", "Fang", "Hounds"] },
+            "Void Eye": { "weak_to": ["Crawler", "Melting Point", "Rhino", "Scorpion", "Sledgehammer", "Steel Ball", "Tarantula", "Typhoon", "Vulcan"], "strong_counter": ["Hacker", "Hounds", "Marksman", "Sabertooth", "Stormcaller"] },
+            "Vulcan": { "weak_to": ["Fortress", "Melting Point", "Overlord", "Phoenix", "Steel Ball"], "strong_counter": ["Crawler", "Arclight", "Marksman", "Mustang", "Sledgehammer"] },
+            "War Factory": { "weak_to": ["Melting Point", "Scorpion", "Overlord"], "strong_counter": ["Arclight", "Stormcaller", "Sledgehammer", "Steel Ball", "Rhino", "Sabertooth", "Vulcan", "Typhoon"] },
+            "Wasp": { "weak_to": ["Mustang", "Fang", "Wrath"], "strong_counter": ["Marksman", "Phoenix", "Melting Point", "Overlord"] },
+            "Wrath": { "weak_to": ["Melting Point", "Overlord", "Phoenix", "Marksman"], "strong_counter": ["Crawler", "Fang", "Sledgehammer", "Steel Ball", "Wasp"] }
+        };
+		
+		const orderedCategories = [
+			'All',
+			'Light',
+			'Medium',
+			'Large',
+			'Heavy',
+			'Giant',
+			'Titan',
+			'Ground',
+			'Air',
+			'Attacks Air',
+			'Melee',
+			'Ranged',
+			'Special',
+			'Splash'
+		];
+				
+		let currentCategory = 'all';
+		
+        // NEW: This loop adds each unit to its own weak_to array, as requested.
+        for (const unit in countersData) {
+            if (countersData.hasOwnProperty(unit)) {
+                if (!countersData[unit].weak_to.includes(unit)) {
+                    countersData[unit].weak_to.push(unit);
+                }
+            }
+        }
+
+
+        let selectedEnemyUnitQuantities = new Map();
+        let deployedFriendlyUnitQuantities = new Map();
+
+        // Helper function to create a new unit pill element
+        const createUnitPill = (unitName, quantity, isEnemy) => {
+            const pill = document.createElement('div');
+            const colorClass = isEnemy ? 'bg-red-700' : 'bg-green-700';
+            const hoverClass = isEnemy ? 'hover:bg-red-600' : 'hover:bg-green-600';
+            pill.className = `unit-pill flex items-center justify-between p-1 px-2 rounded-full cursor-pointer transition-colors ${colorClass} ${hoverClass}`;
+            pill.dataset.unit = unitName;
+            pill.dataset.isEnemy = isEnemy;
+            
+            // Quantity controls
+            const quantityControls = document.createElement('div');
+            quantityControls.className = 'flex items-center gap-1';
+
+            const decreaseBtn = document.createElement('span');
+            decreaseBtn.className = 'quantity-btn bg-gray-600 hover:bg-gray-500 rounded-full w-4 h-4 text-xs';
+            decreaseBtn.textContent = '–';
+            decreaseBtn.onclick = (e) => { e.stopPropagation(); handleQuantityUpdate(unitName, isEnemy, -1); };
+
+            const quantityText = document.createElement('span');
+            quantityText.className = 'quantity-display text-sm';
+            quantityText.textContent = quantity;
+
+            const increaseBtn = document.createElement('span');
+            increaseBtn.className = 'quantity-btn bg-gray-600 hover:bg-gray-500 rounded-full w-4 h-4 text-xs';
+            increaseBtn.textContent = '+';
+            increaseBtn.onclick = (e) => { e.stopPropagation(); handleQuantityUpdate(unitName, isEnemy, 1); };
+
+            quantityControls.appendChild(decreaseBtn);
+            quantityControls.appendChild(quantityText);
+            quantityControls.appendChild(increaseBtn);
+
+            // Unit name
+            const unitNameDiv = document.createElement('div');
+            unitNameDiv.className = 'flex-grow text-xs'; // Reduced font size here
+            unitNameDiv.textContent = unitName;
+
+            pill.appendChild(unitNameDiv);
+            pill.appendChild(quantityControls);
+
+            return pill;
+        };
+
+        const handleQuantityUpdate = (unitName, isEnemy, change) => {
+            const currentMap = isEnemy ? selectedEnemyUnitQuantities : deployedFriendlyUnitQuantities;
+            let currentQuantity = currentMap.get(unitName) || 0;
+            currentQuantity = Math.max(0, currentQuantity + change);
+
+            if (currentQuantity > 0) {
+                currentMap.set(unitName, currentQuantity);
+            } else {
+                currentMap.delete(unitName);
+            }
+
+            renderSelectionSidebars(currentCategory);
+            updateAllCalculations();
+        };
+
+        const renderSelectionSidebars = (filterCategory = 'all') => {
+            const enemyList = document.getElementById('enemy-units-list');
+            const friendlyList = document.getElementById('friendly-units-list');
+            enemyList.innerHTML = '';
+            friendlyList.innerHTML = '';
+
+            const allUnits = Object.keys(mechData).sort();
+
+            allUnits.forEach(unitName => {
+                const unitDataEntry = mechData[unitName];
+                let matchesFilter = false;
+                if (filterCategory === 'all') {
+                    matchesFilter = true;
+                } else if (filterCategory === 'attacks-air') {
+                    matchesFilter = unitDataEntry.targets.includes('air');
+                } else {
+                    matchesFilter = unitDataEntry.category.includes(filterCategory);
+                }
+
+                if (matchesFilter) {
+                    // Render for enemy selection
+                    const enemyPill = createUnitPill(unitName, selectedEnemyUnitQuantities.get(unitName) || 0, true);
+                    enemyPill.onclick = () => handleQuantityUpdate(unitName, true, 1);
+                    enemyList.appendChild(enemyPill);
+
+                    // Render for friendly selection
+                    const friendlyPill = createUnitPill(unitName, deployedFriendlyUnitQuantities.get(unitName) || 0, false);
+                    friendlyPill.onclick = () => handleQuantityUpdate(unitName, false, 1);
+                    friendlyList.appendChild(friendlyPill);
+                }
+            });
+        };
+
+        const renderCategoryTabs = () => {
+            const categories = new Set();
+            Object.values(mechData).forEach(unit => {
+                unit.category.forEach(cat => categories.add(cat));
+            });
+   const tabsContainer = document.getElementById('category-tabs');
+    tabsContainer.innerHTML = ''; // Clear all existing buttons
+
+    orderedCategories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'tab-button text-sm font-semibold py-1 px-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition duration-300';
+        button.dataset.category = category.toLowerCase().replace(/\s/g, '-');
+        button.textContent = category;
+        tabsContainer.appendChild(button);
+    });
+};
+ 
+        const renderUnitCards = (filterCategory = 'all') => {
+            const unitCardsDisplay = document.getElementById('unit-cards-display');
+            unitCardsDisplay.innerHTML = '';
+            
+            Object.entries(mechData).forEach(([unitName, data]) => {
+                let matchesFilter = false;
+                if (filterCategory === 'all') {
+                    matchesFilter = true;
+                } else if (filterCategory === 'attacks-air') {
+                    matchesFilter = data.targets.includes('air');
+                } else {
+                    matchesFilter = data.category.includes(filterCategory);
+                }
+
+                if (matchesFilter) {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-800 rounded-lg p-1 shadow-lg';
+                    card.innerHTML = `
+                        <h3 class="text-xl font-bold mb-2 unit-card-header" id="card-${unitName}">${unitName}</h3>
+                        <p class="text-sm text-gray-400 mb-2">Category: ${data.category.join(', ')}</p>
+                        <p class="text-xs text-gray-300">${data.descriptions}</p>
+                    `;
+                    unitCardsDisplay.appendChild(card);
+                }
+            });
+        };
+
+        const updateAllCalculations = () => {
+            updateAirSuperiorityBanner();
+            updateCounterDisplay();
+            updateStrategicSuggestions();
+            updateUncounteredDisplay();
+        };
+
+        // Function to check for air superiority and show the banner
+        const updateAirSuperiorityBanner = () => {
+            const airSuperiorityBanner = document.getElementById('air-superiority-banner');
+            const bannerText = airSuperiorityBanner.querySelector('p');
+            
+            const enemyAirUnitsPresent = Array.from(selectedEnemyUnitQuantities.keys()).some(unit => mechData[unit].isAirUnit);
+            const friendlyHasAir = Array.from(deployedFriendlyUnitQuantities.keys()).some(unit => mechData[unit].isAirUnit);
+            
+            // Check if there are any enemy units that can be countered by air
+            const enemyUnitsNeedingAirCounters = Array.from(selectedEnemyUnitQuantities.keys()).filter(unit => mechData[unit].targets.includes('air'));
+
+            airSuperiorityBanner.classList.add('hidden');
+            airSuperiorityBanner.classList.remove('bg-green-600', 'bg-red-600', 'bg-yellow-600');
+
+            if (friendlyHasAir && enemyUnitsNeedingAirCounters.length > 0 && !enemyAirUnitsPresent) {
+                 airSuperiorityBanner.classList.remove('hidden');
+                 airSuperiorityBanner.classList.add('bg-green-600');
+                 bannerText.textContent = 'Friendly Air Superiority! The enemy has air units that are not countered.';
+            } else if (enemyAirUnitsPresent && !friendlyHasAir) {
+                airSuperiorityBanner.classList.remove('hidden');
+                airSuperiorityBanner.classList.add('bg-red-600');
+                bannerText.textContent = 'Enemy Air Superiority! Deploy air counters.';
+            } else if (friendlyHasAir && enemyAirUnitsPresent) {
+                airSuperiorityBanner.classList.remove('hidden');
+                airSuperiorityBanner.classList.add('bg-yellow-600');
+                bannerText.textContent = 'Air is contested. Be careful with your air units.';
+            } else {
+                airSuperiorityBanner.classList.add('hidden');
+            }
+        };
+
+        // NEW: Function to update the real-time counter display with compact pills
+        const updateCounterDisplay = () => {
+            const counterList = document.getElementById('counter-list');
+            counterList.innerHTML = '';
+            
+            const enemyUnitsSelected = Array.from(selectedEnemyUnitQuantities.entries());
+            if (enemyUnitsSelected.length === 0) {
+                counterList.innerHTML = '<p class="text-gray-400">Select enemy units to see counters.</p>';
+                return;
+            }
+
+            enemyUnitsSelected.forEach(([enemyUnit, enemyQuantity]) => {
+                const unitCounters = countersData[enemyUnit].weak_to;
+                const totalFriendlyUnits = Array.from(deployedFriendlyUnitQuantities.values()).reduce((sum, q) => sum + q, 0);
+
+                const counterContainer = document.createElement('div');
+                counterContainer.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
+
+                const header = document.createElement('div');
+                header.className = 'flex items-center justify-between mb-2';
+                header.innerHTML = `<h4 class="text-lg font-bold text-red-400">${enemyUnit} x${enemyQuantity}</h4>`;
+
+                const statusDiv = document.createElement('div');
+                const needed = mechData[enemyUnit].unitCount * enemyQuantity;
+                let totalCountersProvided = 0;
+                for (const [friendlyUnit, friendlyQuantity] of deployedFriendlyUnitQuantities.entries()) {
+                    if (unitCounters.includes(friendlyUnit)) {
+                        totalCountersProvided += friendlyQuantity * (mechData[friendlyUnit].unitCount || 1);
+                    }
+                }
+                const remaining = needed - totalCountersProvided;
+
+                const statusColor = remaining <= 0 ? 'text-green-400' : 'text-yellow-400';
+                const statusText = remaining <= 0 ? 'Countered!' : `Needs ${remaining} more counter units.`;
+                statusDiv.innerHTML = `<span class="${statusColor} font-semibold">${statusText}</span>`;
+                header.appendChild(statusDiv);
+                counterContainer.appendChild(header);
+
+                // Create a row of compact pills for friendly counters
+                const pillsContainer = document.createElement('div');
+                pillsContainer.className = 'flex flex-wrap items-center gap-1';
+                
+                const providedCountersForThisUnit = new Map();
+                for (const [friendlyUnit, friendlyQuantity] of deployedFriendlyUnitQuantities.entries()) {
+                    if (unitCounters.includes(friendlyUnit)) {
+                        const unitsProvided = friendlyQuantity * (mechData[friendlyUnit].unitCount || 1);
+                        providedCountersForThisUnit.set(friendlyUnit, unitsProvided);
+                    }
+                }
+
+                if (providedCountersForThisUnit.size > 0) {
+                    pillsContainer.innerHTML = '<span class="text-sm font-bold text-gray-300">Friendly Counters: </span>';
+                    providedCountersForThisUnit.forEach((count, unit) => {
+                        const pill = document.createElement('span');
+                        pill.className = 'compact-counter-pill bg-green-700 text-white';
+                        pill.textContent = `${unit} x${count}`;
+                        pillsContainer.appendChild(pill);
+                    });
+                } else {
+                    pillsContainer.innerHTML = '<p class="text-gray-400 text-sm">No friendly counters deployed yet.</p>';
+                }
+
+                counterContainer.appendChild(pillsContainer);
+                counterList.appendChild(counterContainer);
+            });
+        };
+
+        // NEW: Function to suggest optimal counters with a more compact design
+        const updateStrategicSuggestions = () => {
+            const suggestionsList = document.getElementById('counter-suggestions-list');
+            suggestionsList.innerHTML = '';
+
+            const enemyUnitsSelected = Array.from(selectedEnemyUnitQuantities.entries());
+            if (enemyUnitsSelected.length === 0) {
+                suggestionsList.innerHTML = '<p class="text-gray-400">Select enemy units to get suggestions.</p>';
+                return;
+            }
+
+            const potentialCounters = new Map();
+            const enemyStatus = new Map();
+
+            // First, determine the counter status for each enemy unit
+            enemyUnitsSelected.forEach(([enemyUnit, enemyQuantity]) => {
+                const needed = mechData[enemyUnit].unitCount * enemyQuantity;
+                let totalCountersProvided = 0;
+                for (const [friendlyUnit, friendlyQuantity] of deployedFriendlyUnitQuantities.entries()) {
+                    if (countersData[enemyUnit].weak_to.includes(friendlyUnit)) {
+                        totalCountersProvided += friendlyQuantity * (mechData[friendlyUnit].unitCount || 1);
+                    }
+                }
+                const status = totalCountersProvided >= needed ? 'fullyCountered' : 'partiallyOrNotCountered';
+                enemyStatus.set(enemyUnit, status);
+            });
+
+            // Now, iterate through all friendly units and score them based on enemy status
+            Object.keys(mechData).forEach(friendlyUnit => {
+                let score = 0;
+                let counteredEnemies = new Map();
+                let category = ''; // 'needed' or 'extra'
+
+                enemyUnitsSelected.forEach(([enemyUnit, enemyQuantity]) => {
+                    if (countersData[enemyUnit].weak_to.includes(friendlyUnit)) {
+                        const unitsCountered = enemyQuantity * (mechData[enemyUnit].unitCount || 1);
+                        counteredEnemies.set(enemyUnit, unitsCountered);
+
+                        // If the enemy unit needs a counter, this friendly unit gets a high score
+                        if (enemyStatus.get(enemyUnit) === 'partiallyOrNotCountered') {
+                            score += unitsCountered;
+                            category = 'needed';
+                        } else {
+                            // If the enemy unit is already countered, this friendly unit is an "extra" counter
+                            score += unitsCountered * 0.1; // Lower score for already countered units
+                            if (category !== 'needed') {
+                                category = 'extra';
+                            }
+                        }
+                    }
+                });
+
+                if (score > 0) {
+                    potentialCounters.set(friendlyUnit, { score, counteredEnemies, category });
+                }
+            });
+
+            // Sort potential counters. Primary sort: 'needed' vs 'extra'. Secondary sort: score.
+            const sortedSuggestions = Array.from(potentialCounters.entries()).sort((a, b) => {
+                if (a[1].category === 'needed' && b[1].category !== 'needed') return -1;
+                if (a[1].category !== 'needed' && b[1].category === 'needed') return 1;
+                return b[1].score - a[1].score;
+            });
+
+            if (sortedSuggestions.length > 0) {
+                suggestionsList.innerHTML = '';
+                sortedSuggestions.forEach(([unit, data]) => {
+                    const item = document.createElement('div');
+                    item.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
+                    item.innerHTML = `
+                        <h4 class="text-lg font-bold text-green-400">${unit}</h4>
+                        <p class="text-sm text-gray-300">Effective vs:
+                            ${Array.from(data.counteredEnemies.keys()).map(enemyUnit => `<span class="inline-block bg-gray-600 rounded-full px-2 py-1 text-xs font-semibold text-gray-100 mr-1 mb-1">${enemyUnit}</span>`).join('')}
+                        </p>
+                    `;
+                    suggestionsList.appendChild(item);
+                });
+            } else {
+                suggestionsList.innerHTML = '<p class="text-gray-400">No single unit counters found for the selected enemy composition.</p>';
+            }
+        };
+
+        // NEW: Function to display uncountered friendly units with a more compact design
+        const updateUncounteredDisplay = () => {
+            const uncounteredList = document.getElementById('uncountered-list');
+            uncounteredList.innerHTML = '';
+
+            const friendlyUnitsSelected = Array.from(deployedFriendlyUnitQuantities.entries());
+            if (friendlyUnitsSelected.length === 0) {
+                uncounteredList.innerHTML = '<p class="text-gray-400">Select friendly units to see which are uncountered.</p>';
+                return;
+            }
+
+            const enemyUnitsweak_toes = new Set();
+            for (const [enemyUnit] of selectedEnemyUnitQuantities.entries()) {
+                const weak_toes = countersData[enemyUnit].weak_to;
+                weak_toes.forEach(weak_to => enemyUnitsweak_toes.add(weak_to));
+            }
+
+            const uncounteredUnits = [];
+            friendlyUnitsSelected.forEach(([friendlyUnit, friendlyQuantity]) => {
+                // A unit is uncountered if it is NOT in any of the enemy's weak_toes lists.
+                const isCountered = Array.from(selectedEnemyUnitQuantities.keys()).some(enemyUnitName => {
+                    return countersData[enemyUnitName].weak_to.includes(friendlyUnit);
+                });
+
+                if (!isCountered) {
+                    uncounteredUnits.push({ unit: friendlyUnit, quantity: friendlyQuantity });
+                }
+            });
+            
+            // Sort uncountered units by score (more enemy units they are not countered by, the better)
+            uncounteredUnits.sort((a, b) => {
+                const aScore = Array.from(selectedEnemyUnitQuantities.keys()).filter(enemyUnit => !countersData[enemyUnit].weak_to.includes(a.unit)).length;
+                const bScore = Array.from(selectedEnemyUnitQuantities.keys()).filter(enemyUnit => !countersData[enemyUnit].weak_to.includes(b.unit)).length;
+                return bScore - aScore;
+            });
+
+            if (uncounteredUnits.length > 0) {
+                uncounteredList.innerHTML = '';
+                uncounteredUnits.forEach(item => {
+                    const unitDiv = document.createElement('div');
+                    unitDiv.className = 'bg-gray-800 p-1 rounded-lg shadow-inner';
+                    unitDiv.innerHTML = `
+                        <h4 class="text-lg font-bold text-blue-400 mb-1">${item.unit} x${item.quantity}</h4>
+                        <p class="text-sm text-gray-300">This unit has no direct counter among the enemy forces.</p>
+                    `;
+                    uncounteredList.appendChild(unitDiv);
+                });
+            } else {
+                uncounteredList.innerHTML = '<p class="text-gray-400">All of your deployed units are countered by the enemy force.</p>';
+            }
+        };
+
+
+        const setupEventListeners = () => {
+            // Updated event listeners for quantity buttons in the sidebars
+            document.getElementById('enemy-units-list').addEventListener('click', (e) => {
+                const pill = e.target.closest('.unit-pill');
+                if (pill) {
+                    handleQuantityUpdate(pill.dataset.unit, true, 1);
+                }
+            });
+            document.getElementById('friendly-units-list').addEventListener('click', (e) => {
+                const pill = e.target.closest('.unit-pill');
+                if (pill) {
+                    handleQuantityUpdate(pill.dataset.unit, false, 1);
+                }
+            });
+
+            document.getElementById('clear-all-selections-btn').addEventListener('click', () => {
+                selectedEnemyUnitQuantities.clear();
+                deployedFriendlyUnitQuantities.clear();
+                const activeCategoryButton = document.querySelector('.tab-button.bg-gray-700');
+                const activeCategory = activeCategoryButton ? activeCategoryButton.dataset.category : 'all';
+                renderSelectionSidebars(activeCategory);
+                updateAllCalculations();
+            });
+
+            document.getElementById('toggle-unit-cards-btn').addEventListener('click', (event) => {
+                const unitCardsDisplay = document.getElementById('unit-cards-display');
+                unitCardsDisplay.classList.toggle('hidden');
+                if (unitCardsDisplay.classList.contains('hidden')) {
+                    event.target.textContent = 'Show Unit Cards';
+                } else {
+                    event.target.textContent = 'Hide Unit Cards';
+                }
+            });
+
+            document.getElementById('category-tabs').addEventListener('click', (event) => {
+                const target = event.target;
+				const category = target.dataset.category;
+				currentCategory = category;
+                if (target.dataset.category) {
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('bg-gray-700');
+                        btn.classList.add('bg-gray-800');
+                    });
+                    target.classList.remove('bg-gray-800');
+                    target.classList.add('bg-gray-700');
+                    const category = target.dataset.category;
+					renderSelectionSidebars(currentCategory);
+					renderUnitCards(currentCategory);
+
+                }
+            });
+        };
+
+        const initializeApp = () => {
+            renderCategoryTabs();
+            renderSelectionSidebars();
+            renderUnitCards();
+            setupEventListeners();
+            updateAllCalculations();
+        };
+
+        initializeApp();
+    });
+</script>
+
+</body>
+</html>
